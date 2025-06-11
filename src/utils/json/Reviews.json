@@ -1,0 +1,72 @@
+[
+  {
+    "avatar": "https://i.pravatar.cc/150?img=1",
+    "name": "Alice Johnson",
+    "review": "La qualità del prodotto è straordinaria e la consegna è stata puntuale!",
+    "ratings": 5,
+    "time": "2 minuti fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=2",
+    "name": "Michael Smith",
+    "review": "Esperienza complessivamente buona, ma il servizio clienti potrebbe migliorare.",
+    "ratings": 4,
+    "time": "4 ore fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=3",
+    "name": "Emma Davis",
+    "review": "Mi è piaciuto tantissimo! Lo consiglierò agli amici.",
+    "ratings": 5,
+    "time": "1 giorno fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=4",
+    "name": "John Brown",
+    "review": "Il prodotto era discreto, non come mi aspettavo.",
+    "ratings": 3,
+    "time": "2 giorni fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=5",
+    "name": "Sophia Wilson",
+    "review": "Ha superato le mie aspettative. Ottimo rapporto qualità-prezzo!",
+    "ratings": 5,
+    "time": "3 giorni fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=6",
+    "name": "Oliver Garcia",
+    "review": "L'imballaggio era danneggiato, ma il prodotto era a posto.",
+    "ratings": 3,
+    "time": "5 giorni fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=7",
+    "name": "Mia Martinez",
+    "review": "Esperienza fantastica! Il supporto clienti è stato molto utile.",
+    "ratings": 5,
+    "time": "1 settimana fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=8",
+    "name": "James Lee",
+    "review": "La consegna è stata ritardata, ma la qualità del prodotto è ottima.",
+    "ratings": 4,
+    "time": "2 settimane fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=9",
+    "name": "Charlotte White",
+    "review": "Il prodotto vale ogni centesimo. Molto soddisfatta!",
+    "ratings": 5,
+    "time": "3 settimane fa"
+  },
+  {
+    "avatar": "https://i.pravatar.cc/150?img=10",
+    "name": "Liam Harris",
+    "review": "Non sono soddisfatto del prodotto. Non ha soddisfatto le mie aspettative.",
+    "ratings": 2,
+    "time": "1 mese fa"
+  }
+]
