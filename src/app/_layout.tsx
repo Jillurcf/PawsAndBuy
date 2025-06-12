@@ -36,15 +36,15 @@ import store from '../redux/store';
 
 export default function RootLayout() {
    const [loaded] = useFonts({
-    RobotoBlack: require('../assets/fonts/Roboto/Roboto-Black.ttf'),
-    RobotoBlackItalic: require('../assets/fonts/Roboto/Roboto-BlackItalic.ttf'),
+    RoboBlack: require('../assets/fonts/Roboto/Roboto-Black.ttf'),
+    RoboBlackItalic: require('../assets/fonts/Roboto/Roboto-BlackItalic.ttf'),
     RoboMedium: require('../assets/fonts/Roboto/Roboto-Medium.ttf'),
-    RobotoBold: require('../assets/fonts/Roboto/Roboto-Bold.ttf'),
-    RobotoBoldItalic: require('../assets/fonts/Roboto/Roboto-BoldItalic.ttf'),
-    RobotoItalic: require('../assets/fonts/Roboto/Roboto-Italic.ttf'),
-    RobotoLight: require('../assets/fonts/Roboto/Roboto-Light.ttf'),
-    RobotoMedium: require('../assets/fonts/Roboto/Roboto-Medium.ttf'),
-    RobotoRegular: require('../assets/fonts/Roboto/Roboto-Regular.ttf'),
+    RoboBold: require('../assets/fonts/Roboto/Roboto-Bold.ttf'),
+    RoboBoldItalic: require('../assets/fonts/Roboto/Roboto-BoldItalic.ttf'),
+    RoboItalic: require('../assets/fonts/Roboto/Roboto-Italic.ttf'),
+    RoboLight: require('../assets/fonts/Roboto/Roboto-Light.ttf'),
+  
+    RoboRegular: require('../assets/fonts/Roboto/Roboto-Regular.ttf'),
   });
 
   if (!loaded) {

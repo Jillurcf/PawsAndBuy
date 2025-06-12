@@ -111,7 +111,7 @@ const LoadingSplash = ({navigation} : {navigation:any}) => {
     //   }
       handleCheckValidToken();
     } else {
-      (navigation as any)?.replace('Login');
+      router.replace('/screens/Auth/Login');
     }
   }, []);
 

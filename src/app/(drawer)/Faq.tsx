@@ -5,6 +5,8 @@ import { ExpandableSection } from 'react-native-ui-lib';
 import { IconBack, IconBottomArrow, IconFaq, IconTopArrow } from '@/src/assets/icons/Icons';
 import tw from '@/src/lib/tailwind';
 import { useGetFaqQuery } from '@/src/redux/api/apiSlice/apiSlice';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { SvgXml } from 'react-native-svg';
 
 
@@ -35,9 +37,9 @@ console.log(data)
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="always">
-        <View style={tw`flex-row items-center border-b border-b-offWhite`}>
+        <View style={tw`flex-row mt-8 items-center border-b border-b-offWhite`}>
           <TouchableOpacity
-          onPress={()=> navigation?.goBack()}
+          onPress={()=> router?.back()}
           style={tw`flex-row items-center gap-3 py-3`}>
             <SvgXml xml={IconBack} />
             <Text style={tw`text-title text-base font-RoboMedium`}>
@@ -80,6 +82,7 @@ console.log(data)
           ))}
         </View>
       </ScrollView>
+      <StatusBar translucent={false} />
     </View>
   );
 };

@@ -29,9 +29,10 @@ import ImageResizer from 'react-native-image-resizer';
 
 // https://github.com/firebase/firebase-ios-sdk    this is ios sdk
 GoogleSignin.configure({
-  iosClientId:'634383336879-4f9vfacnrr7ka4nhlahebvhaa3f1agoo.apps.googleusercontent.com',
+  //  androidClientId: '292720943978-3jvar6l48oabdo7b4gcqdnj23tl7gr3c.apps.googleusercontent.com', // client ID of type ANDROID for your app. Required to get the `idToken` on the user object, and for offline access
+  iosClientId:'292720943978-f6evamcqtna5665s7pqobpf2omrfmfr0.apps.googleusercontent.com',
   webClientId:
-    '256652221088-3ngujo2l04ocg9nlp200cpeq8cs4sb5p.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
+    '292720943978-eem026vbf56jsrhnfcrrjf6jkkbp2ql7.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
   offlineAccess: true,
   forceCodeForRefreshToken: true,
 });
@@ -193,7 +194,7 @@ const Login = ({navigation}: any) => {
           if (apiResponse?.data?.access_token) {
            const res = setStorageToken(apiResponse?.data?.access_token);
            console.log("google token", res)
-            navigation?.replace('LoadingSplash');
+            router?.replace('/');
           }
         } catch (error) {
           console.error(

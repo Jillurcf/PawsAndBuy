@@ -1,9 +1,10 @@
-import {View, TextInput, Text, TouchableOpacity} from 'react-native';
 import React from 'react';
-import {SvgXml} from 'react-native-svg';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SvgXml } from 'react-native-svg';
 import tw from '../lib/tailwind';
 
 const InputText = ({
+  value,
   placeholder,
   placeholderColor,
   iconLeft,
@@ -35,6 +36,7 @@ const InputText = ({
         ]}>
         {iconLeft && <SvgXml xml={iconLeft} />}
         <TextInput
+          value={value}
           placeholder={placeholder}
           placeholderTextColor={placeholderColor}
           style={[tw`font-RoboMedium flex-1 text-title`, style]}

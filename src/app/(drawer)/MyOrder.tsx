@@ -4,10 +4,12 @@ import InputText from '@/src/components/InputText';
 import MyOrderReview from '@/src/components/MyOrderReview';
 import tw from '@/src/lib/tailwind';
 import { useGetMyOrderQuery, usePostCreateRatingsMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  StatusBar,
   Text,
   TouchableOpacity,
   View
@@ -106,8 +108,8 @@ const MyOrder = ({navigation, route}: any) => {
   return (
     <View style={tw`h-full bg-white px-[4%] pb-4`}>
       <TouchableOpacity
-        style={tw`mt-4 flex-row items-center gap-2`}
-        onPress={() => navigation?.goBack()}>
+        style={tw`mt-8 flex-row items-center gap-2`}
+        onPress={() => router?.back()}>
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>
           {/* {title || 'Seller Collection'} */}
@@ -143,6 +145,7 @@ const MyOrder = ({navigation, route}: any) => {
           showsVerticalScrollIndicator={false}
         />
       )}
+      <StatusBar translucent={false}/>
     </View>
   );
 };

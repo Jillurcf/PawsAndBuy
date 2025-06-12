@@ -27,6 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+        <string>com.googleusercontent.apps.292720943978-f6evamcqtna5665s7pqobpf2omrfmfr0</string>
           <string>pawsandbuy</string>
           <string>com.anonymous.PawsAndBuy</string>
         </array>

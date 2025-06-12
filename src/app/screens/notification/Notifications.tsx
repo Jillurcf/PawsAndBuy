@@ -1,6 +1,7 @@
 import { IconBack } from '@/src/assets/icons/Icons';
 import tw from '@/src/lib/tailwind';
 import { useGetMarkSingleNotificationsQuery, useGetNotificationsQuery, useLazyGetMarkAllleNotificationsQuery } from '@/src/redux/api/apiSlice/apiSlice';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
@@ -48,11 +49,11 @@ const handleAllMarkedNotification = () => {
 return (
     <View style={tw`h-full bg-white px-[4%]`}>
       <View
-        style={tw`flex-row items-center justify-between py-3
+        style={tw`flex-row mt-6 items-center justify-between py-3
       `}>
         <TouchableOpacity
           style={tw`flex-row items-center gap-2`}
-          onPress={() => navigation?.goBack()}>
+          onPress={() => router?.back()}>
           <SvgXml xml={IconBack} />
           <Text style={tw`text-title text-base font-RoboMedium`}>
             {/* Notifiche */}
@@ -61,7 +62,7 @@ return (
         </TouchableOpacity>
         <TouchableOpacity onPress={handleAllMarkedNotification}>
           
-          <Text style={tw`text-primary text-xs font-RoboMedium`}>
+          <Text style={tw`text-primary font-RoboMedium`}>
             {/* Segna come letto */}
             Mark as read
           </Text>

@@ -1,6 +1,8 @@
 import { IconBack, IconVerified } from '@/src/assets/icons/Icons';
 import tw from '@/src/lib/tailwind';
 import { useGetWishListQuery, usePostCreateRatingsMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -61,10 +63,10 @@ const WishList = ({navigation, route}: any) => {
     );
   }
   return (
-    <View style={tw`h-full bg-white px-[4%] pb-4`}>
+    <View style={tw`flex-1 bg-white px-[4%] pb-4`}>
       <TouchableOpacity
-        style={tw`mt-4 flex-row items-center gap-2`}
-        onPress={() => navigation?.goBack()}>
+        style={tw`mt-8 flex-row items-center gap-2`}
+        onPress={() => router?.back()}>
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>
           {/* {title || 'Seller Collection'} */}
@@ -166,6 +168,7 @@ const WishList = ({navigation, route}: any) => {
           showsVerticalScrollIndicator={false}
         />
       )}
+      <StatusBar translucent={false} />
     </View>
   );
 };

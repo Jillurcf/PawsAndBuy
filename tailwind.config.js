@@ -13,15 +13,15 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        RobotoBlack: 'RobotoBlack',
-        RobotoBlackItalic: 'RobotoBlackItalic',
-        RobotoBold: ' RobotoBold',
-        RobotoBoldItalic: 'RobotoBoldItalic',
+        RoboBlack: 'RoboBlack',
+        RoboBlackItalic: 'RoboBlackItalic',
+        RoboBold: ' RoboBold',
+        RoboBoldItalic: 'RoboBoldItalic',
         RoboMedium: 'RoboMedium',
-        RobotoItalic: 'RobotoItalic',
-        RobotoLight: 'RobotoLight',
-        RobotoMedium: 'RobotoMedium',
-        RobotoRegular: 'RobotoRegular',
+        RoboItalic: 'RoboItalic',
+        RoboLight: 'RoboLight',
+        RoboMedium: 'RoboMedium',
+        RoboRegular: 'RoboRegular',
       },
 
       colors: {
