@@ -9,6 +9,7 @@ import tw from '../../../lib/tailwind';
 // import CardInformation from './component/CardInformation';
 
 import { IconEdit, IconMail, IconMap } from '@/src/assets/icons/Icons';
+import { router } from 'expo-router';
 import { useGetProfileQuery } from '../../../redux/api/apiSlice/apiSlice';
 import Reviews from '../../screens/profile/component/Reviews';
 import Wardrobe from '../../screens/profile/component/Wardrobe';
@@ -55,7 +56,7 @@ const Profile = ({navigation}: any) => {
             <TouchableOpacity
               style={tw`bg-primary px-2 py-1 rounded-lg flex-row items-center gap-1`}
               onPress={() => {
-                navigation?.navigate('EditProfile');
+               router.push('/screens/profile/EditProfile');
               }}>
               <SvgXml xml={IconEdit} />
               <Text style={tw`text-white text-[10px] font-RoboNormal`}>

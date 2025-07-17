@@ -11,16 +11,18 @@ import {
 import { IconBack, IconVerified } from '@/src/assets/icons/Icons';
 import Button from '@/src/components/Button';
 import { CustomAlert } from '@/src/components/CustomAlert';
+import InputText from '@/src/components/InputText';
 import NormalModal from '@/src/components/NormalModal';
 import tw from '@/src/lib/tailwind';
 import { useGetHomeProductDetailsQuery, useGetOfferPirzeQuery, usePsotAcceptRejectOfferMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router, useLocalSearchParams } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
 
 
 
-const ApprovedProduct = ({navigation, route}: any) => {
-  const {from, id, offer_id} = route?.params || {};
+const ApprovedProduct = () => {
+  const { from, id, offer_id } = useLocalSearchParams();
   const images = [
     require('../../../assets/images/food-1.png'),
     require('../../../assets/images/food-2.png'),
@@ -35,8 +37,8 @@ const ApprovedProduct = ({navigation, route}: any) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isPriceModalVisible, setIsPriceModalVisible] = useState(false);
   const [acceptOfferModalVisible, setAcceptOfferModalVisible] = useState(false);
-  const {data, isLoading, isError, refetch} = useGetHomeProductDetailsQuery(id);
-  const {data: offoerPrize} = useGetOfferPirzeQuery(offer_id);
+  const { data, isLoading, isError, refetch } = useGetHomeProductDetailsQuery(id);
+  const { data: offoerPrize } = useGetOfferPirzeQuery(offer_id);
   const [psotAcceptRejectOffer] = usePsotAcceptRejectOfferMutation();
   console.log('30', offoerPrize?.data?.seller_id);
   console.log('approve offer', data?.data?.images[0]);
@@ -58,16 +60,16 @@ const ApprovedProduct = ({navigation, route}: any) => {
   };
   console.log('checking the data: ', from);
   const handleApporve = async () => {
-    const res = await psotAcceptRejectOffer({id: offer_id, type: 'accept'});
+    const res = await psotAcceptRejectOffer({ id: offer_id, type: 'accept' });
     setAlertVisible(true);
     if (res) {
     }
     console.log('res', res);
     refetch();
-    
+
   };
   const handleCancel = async () => {
-    const res = await psotAcceptRejectOffer({id: offer_id, type: 'reject'});
+    const res = await psotAcceptRejectOffer({ id: offer_id, type: 'reject' });
     setAlertVisible(true);
     console.log('res', res);
     refetch();
@@ -85,7 +87,7 @@ const ApprovedProduct = ({navigation, route}: any) => {
     <View style={tw`h-full bg-white px-[4%]`}>
       <TouchableOpacity
         style={tw`mt-4 flex-row items-center gap-2 pb-2`}
-        onPress={() => navigation?.goBack()}>
+        onPress={() => router.back()}>
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>
           {/* Cibo per cani */}
@@ -99,7 +101,7 @@ const ApprovedProduct = ({navigation, route}: any) => {
         <View>
           <View style={tw`bg-primary100 p-3 rounded-xl mt-4`}>
             <Image
-              source={{uri: data?.data?.images[0]}}
+              source={{ uri: data?.data?.images[0] }}
               style={tw`w-full rounded-xl h-56`}
             />
 
@@ -112,7 +114,7 @@ const ApprovedProduct = ({navigation, route}: any) => {
                   key={index}
                   onPress={() => handleImageClick(index)}>
                   <Image
-                    source={{uri: d}}
+                    source={{ uri: d }}
                     style={tw`w-20 h-20 rounded-xl mr-2`}
                   />
                 </TouchableOpacity>
@@ -141,7 +143,7 @@ const ApprovedProduct = ({navigation, route}: any) => {
               <View style={tw`flex-row items-center justify-between`}>
                 <Text style={tw`text-subT text-sm font-RoboMedium`}>
                   {/* Condizione:{' '} */}
-                  Condition: 
+                  Condition:
                 </Text>
                 <Text style={tw`text-title text-sm font-RoboBold`}>
                   {data?.data?.condition}
@@ -188,12 +190,12 @@ const ApprovedProduct = ({navigation, route}: any) => {
               </View>
             </View>
             {offoerPrize?.data?.status &&
-            offoerPrize?.data?.status === 'pending' ? (
+              offoerPrize?.data?.status === 'pending' ? (
               <View style={tw`mt-2 gap-y-2`}>
                 <Button
                   title="Approve"
                   onPress={handleApporve}
-                  // onPress={() => setIsPriceModalVisible(false)}
+                // onPress={() => setIsPriceModalVisible(false)}
                 />
                 <Button
                   title="Cancel"
@@ -206,8 +208,14 @@ const ApprovedProduct = ({navigation, route}: any) => {
             ) : offoerPrize?.data?.status === 'accept' && !offoerPrize?.data?.seller_id ? (
               <Button
                 title="Buy now"
-                onPress={() => navigation?.navigate('Payment', { id })}
+                onPress={() =>
+                  router.push({
+                    pathname: '/screens/payment/Payment',
+                    params: { id: id },
+                  })
+                }
               />
+
             ) : null}
           </View>
           <NormalModal

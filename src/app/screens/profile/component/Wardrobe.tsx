@@ -12,6 +12,7 @@ import { IconVerified, kibupicon } from '@/src/assets/icons/Icons';
 import InputText from '@/src/components/InputText';
 import tw from '@/src/lib/tailwind';
 import { useGetwardrobeProductListQuery, usePostDeleteProductMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
 
@@ -88,7 +89,7 @@ const Wardrobe = ({navigation}: any) => {
         <TouchableOpacity
           style={tw`w-[49%] rounded-xl mb-2 bg-primary100 p-2`}
           key={index}
-          onPress={() => navigation?.navigate('ProductDetails', {id: d?.id, from: 'Own Product'})}>
+          onPress={() => router.push({pathname: '/screens/productDetails/ProductDetails', params: {id: d?.id, from: 'Own Product'}})}>
           <Image
             source={{uri: d?.images[0]}}
             style={tw`h-38 w-full rounded-xl`}
@@ -148,7 +149,7 @@ const Wardrobe = ({navigation}: any) => {
               // onPress={handlePromoteProduct}
               onPress={() => {
                 setPromotionModal(false);
-                navigation?.navigate('PromotionPayment', {id});
+                router.push({pathname: '/screens/promotion/PromotionPayment', params: {id: id}});
               }}
               style={tw`border p-3 rounded-lg mb-2`}>
               <Text style={tw`text-[#064145] text-center font-RoboBold`}>

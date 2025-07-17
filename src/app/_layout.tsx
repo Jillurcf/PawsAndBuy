@@ -27,15 +27,17 @@
 //   },
 // });
 
+import { StripeProvider } from '@stripe/stripe-react-native';
 import { useFonts } from 'expo-font';
 import { Slot } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
+import tw from '../lib/tailwind';
 import store from '../redux/store';
 
 export default function RootLayout() {
-   const [loaded] = useFonts({
+  const [loaded] = useFonts({
     RoboBlack: require('../assets/fonts/Roboto/Roboto-Black.ttf'),
     RoboBlackItalic: require('../assets/fonts/Roboto/Roboto-BlackItalic.ttf'),
     RoboMedium: require('../assets/fonts/Roboto/Roboto-Medium.ttf'),
@@ -43,7 +45,6 @@ export default function RootLayout() {
     RoboBoldItalic: require('../assets/fonts/Roboto/Roboto-BoldItalic.ttf'),
     RoboItalic: require('../assets/fonts/Roboto/Roboto-Italic.ttf'),
     RoboLight: require('../assets/fonts/Roboto/Roboto-Light.ttf'),
-  
     RoboRegular: require('../assets/fonts/Roboto/Roboto-Regular.ttf'),
   });
 
@@ -51,14 +52,31 @@ export default function RootLayout() {
 
     return null;
   }
+  // return (
+  //   <StripeProvider publishableKey="pk_test_51QKAtBKOpUtqOuW1x5VdNqH3vG7CZZl1P6V3VuV1qsRUmPLNk26i34AXeu2zCO3QurFJAOZ9zfb0EkWeCVhqBYgH008X41cXr6">
+  //     <SafeAreaView style={tw`flex-1`}>
+  //       <GestureHandlerRootView >
+  //         <Provider store={store}>
+  //           <Slot />
+  //         </Provider>
+
+  //       </GestureHandlerRootView>
+  //     </SafeAreaView>
+  //   </StripeProvider>
+
+  // );
   return (
-    <GestureHandlerRootView >
+    <StripeProvider publishableKey="pk_test_51QKAtBKOpUtqOuW1x5VdNqH3vG7CZZl1P6V3VuV1qsRUmPLNk26i34AXeu2zCO3QurFJAOZ9zfb0EkWeCVhqBYgH008X41cXr6">
       <Provider store={store}>
-   <Slot /> 
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaView style={tw`flex-1`}>
+            <Slot />
+          </SafeAreaView>
+        </GestureHandlerRootView>
       </Provider>
-   
-    </GestureHandlerRootView>
+    </StripeProvider>
   );
+
 }
 
 const styles = StyleSheet.create({

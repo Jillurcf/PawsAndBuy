@@ -335,6 +335,7 @@ const Home = ({navigation}: NavigProps<null>) => {
         {/* Search Bar */}
         <View style={tw`mt-3`}>
           <InputText
+          style={tw`h-10`}
             value={searchItem}
             onChangeText={value => setSearchItem(value)}
             placeholder=

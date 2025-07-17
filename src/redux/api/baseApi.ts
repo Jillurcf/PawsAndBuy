@@ -26,10 +26,10 @@
 // });
 
 
-import {BaseQueryFn, createApi} from '@reduxjs/toolkit/query/react';
-import axios, {AxiosRequestConfig, AxiosResponse} from 'axios';
+import { BaseQueryFn } from '@reduxjs/toolkit/query/react';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import {getStorageToken} from '../../utils/Utils';
+import { getStorageToken } from '../../utils/Utils';
 
 interface BaseQueryArgs extends AxiosRequestConfig {
   url: string;
@@ -52,12 +52,22 @@ export const baseQueryWithRath: BaseQueryFn<BaseQueryArgs, unknown, unknown> = a
   // if (cache.has(cacheKey)) {
   //   return { data: cache.get(cacheKey) };
   // }
+ 
+
+// const baseURL = Platform.OS === 'ios'
+//   ? 'https://pawsandbuy.com/api'
+//   : 'https://pawsandbuy.com/api';
+// const baseURL = Platform.OS === 'ios'
+//   ? 'http://103.186.20.114:8001/api'
+//   : 'http://103.186.20.114:8001/api';
+
 
   try {
     const token = getStorageToken();
     const result: AxiosResponse = await axios({
       // baseURL: 'http://192.168.12.140:8000/api',
-      baseURL: 'http://182.252.68.227:8001/api',
+      baseURL: 'http://103.186.20.114:8001/api',
+      // baseURL,
       ...args,
       url: args.url,
       method: args.method,
@@ -378,4 +388,4 @@ export const baseQueryWithRath: BaseQueryFn<BaseQueryArgs, unknown, unknown> = a
 //   useGetNotificationsQuery,
 //  } = api;
 
-export const imageUrl = "http://182.252.68.227:8001"
+export const imageUrl = "http://103.186.20.114:8001"

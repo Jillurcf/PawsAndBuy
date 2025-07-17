@@ -62,7 +62,8 @@ const SellOrder = ({navigation, route}: any) => {
     };
 
     const handleProductDetails = (id) => {
-        navigation?.navigate('OrderProductDetails', {id});
+    router.push({pathname: '/screens/productDetails/OrderProductDetails',
+        params:  {id: id, from: "Sellrders"}});
     };
 
     const renderItem = ({item}) => (

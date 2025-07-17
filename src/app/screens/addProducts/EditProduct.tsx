@@ -3,16 +3,18 @@ import ProductEditField from '@/src/components/ProductEditField';
 import SecondaryHeader from '@/src/components/SecondaryHeader';
 import tw from '@/src/lib/tailwind';
 import { useGetHomeProductDetailsQuery, usePosUpdateProductMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
-const EditProduct = ({navigation, route}: any) => {
-  const {id} = route?.params;
-  const {data, isLoading, isError} = useGetHomeProductDetailsQuery(id);
+const EditProduct = ({ navigation, route }: any) => {
+  const { id } = useLocalSearchParams()
+  const { data, isLoading, isError } = useGetHomeProductDetailsQuery(id);
   // console.log("profile data", data?.data?.id)
 
   const [posUpdateProduct] = usePosUpdateProductMutation();
   const [alertVisible, setAlertVisible] = useState(false);
+    const [loading, setLoading] = React.useState(false);
 
   const showCustomAlert = () => {
     setAlertVisible(true);
@@ -22,6 +24,7 @@ const EditProduct = ({navigation, route}: any) => {
     setAlertVisible(false);
   };
   const handleUpload = async productData => {
+     setLoading(true);
     try {
       const formData = new FormData();
 
@@ -30,7 +33,7 @@ const EditProduct = ({navigation, route}: any) => {
       formData.append('description', productData.description);
       formData.append('price', productData.price);
       formData.append('category_id', productData.category_id);
-      // formData.append('sub_category_id', productData.sub_category_id);
+      formData.append('sub_category_id', productData.sub_category_id);
       formData.append('condition', productData.condition);
       formData.append('weight', productData.weight);
       const isFood = productData.is_food === 'yes' ? 1 : 0;
@@ -56,26 +59,7 @@ const EditProduct = ({navigation, route}: any) => {
         return;
       }
 
-      // formData.append('sub_category_id', productData?.sub_category_id);
-
-      // Append sub_category_ids (handle arrays properly)
-      // productData.sub_category_ids.forEach((id, index) => {
-      //   formData.append(`sub_category_ids[${index}]`, id);
-      // });
-
-      // Append images in the correct format
-      // productData.images.forEach((image, index) => {
-      //   if (!image.uri || !image.name || !image.type) {
-      //     throw new Error(`Invalid image data at index ${index}`);
-      //   }
-
-      //   // React Native requires using the actual file format for `uri`
-      //   formData.append(`images[${index}]`, {
-      //     uri: image?.uri,
-      //     name: image?.name,
-      //     type: image?.type, // E.g., 'image/png'
-      //   });
-      // });
+     
 
       // Append images as binary files
       if (Array.isArray(productData.images)) {
@@ -98,11 +82,15 @@ const EditProduct = ({navigation, route}: any) => {
       // Use `formData` instead of `productData` for the API call
       const response = await posUpdateProduct({
         formData,
-        id: route?.params?.id,
+        id: id,
       });
-      console.log('product updated', response);
-      if (response?.data) {
+      console.log('product updated =========', response);
+      if (response?.data?.status === true) {
         setAlertVisible(true);
+        
+          setLoading(false); // Hide loading indicator
+           router.back();
+       
       }
     } catch (error) {
       console.error(
@@ -169,7 +157,8 @@ const EditProduct = ({navigation, route}: any) => {
         {/* <ProductEditFields data={data}  id={id} handleUpload={handleUpload} /> */}
         <ProductEditField
           data={data}
-          isLoading={isLoading}
+          // isLoading={isLoading}
+            loading={loading}
           id={id}
           handleUpload={handleUpload}
         />

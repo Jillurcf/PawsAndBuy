@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
   Linking,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  useColorScheme,
+  View
 } from 'react-native';
 import { Dropdown, MultiSelect } from 'react-native-element-dropdown';
 import { SvgXml } from 'react-native-svg';
@@ -43,15 +43,18 @@ const ProductEditFields = ({
   route,
   id,
   data,
+  loading
 }: // isLoading
   {
-    handleUpload: () => void;
+     handleUpload: (productData: IProduct) => void; // ✅ Fix this
+    loading: boolean;
   }) => {
   const [subCategories, setSubCategories] = React.useState<[]>([]);
-  const [loading, setLoading] = React.useState(false);
+  // const [loading, setLoading] = React.useState(false);
   const [categoryId, setCategoryId] = React.useState<string>();
   const { data: profileData } = useGetProfileQuery({});
   const [openingWebview, setOpeningWebview] = useState(false);
+  const colorScheme = useColorScheme();
   console.log(openingWebview, "OpeningWebvew+++++++++++++++")
   // const [postCreateConnect] = usePostCreateConnectMutation();
   // const {id} = route?.params
@@ -281,7 +284,7 @@ const ProductEditFields = ({
 
 
    
-    setLoading(true); // Show loading indicator
+    // setLoading(true); // Show loading indicator
     try {
       const formData = new FormData();
 
@@ -306,17 +309,361 @@ const ProductEditFields = ({
       console.error('Error fetching connect URL:', error);
       Alert.alert('Error', 'Failed to create Stripe Connect account.');
     } finally {
-      setLoading(false); // Hide loading indicator
+      // setLoading(false); // Hide loading indicator
     }
   };
-  if (isLoading) {
-    return (
-      <View style={tw`flex-1 justify-center items-center`}>
-        <ActivityIndicator size="large" color="#064145" />
-        <Text style={tw`text-primary mt-2`}>Loading ....</Text>
-      </View>
-    );
-  }
+ 
+  // return (
+  //   <View>
+  //     <Text style={tw`text-title text-[20px] font-RoboMedium`}>
+  //       {/* {'Vendere un prodotto'} */}
+  //       Sell a product.
+  //     </Text>
+  //     <View style={tw`mt-4`}>
+  //       <Text style={tw`text-title text-sm font-RoboMedium mb-2`}>
+  //         {/* Aggiungi fino a 5 foto */}
+  //         Add up to 5 photos.
+  //       </Text>
+
+  //       <View
+  //         style={tw`border border-[#949494] border-dotted rounded-xl py-6 px-2 items-center justify-center`}>
+  //         <TouchableOpacity
+  //           style={tw`flex-row items-center gap-4 border border-primary rounded-xl py-2 px-6`}
+  //           onPress={openGallery}>
+  //           <SvgXml xml={IconPlus} />
+  //           <Text style={tw`text-primary text-xs font-RoboBold`}>
+  //             {/* Carica foto */}
+  //             Upload photo.
+  //           </Text>
+  //         </TouchableOpacity>
+
+  //         <View style={tw`flex-row flex-wrap`}>
+  //           {productData?.images.map((image, index) => (
+  //             <Image
+  //               key={index}
+  //               source={{ uri: image.uri }}
+  //               style={tw`w-20 h-20 m-2 rounded`}
+  //             />
+  //           ))}
+  //         </View>
+  //         <View style={tw`flex-row items-center mt-4`}>
+  //           {productData?.images?.map((item: Asset, index: number) => (
+  //             <View key={index} style={tw`relative`}>
+  //               <Image
+  //                 source={{ uri: item.uri }}
+  //                 style={tw`${productData?.images[0] === item.uri
+  //                     ? 'w-16 h-16'
+  //                     : 'w-12 h-12'
+  //                   } rounded-lg ml-2`}
+  //               />
+
+  //               <TouchableOpacity
+  //                 onPress={() => {
+  //                   setProductData(prev => ({
+  //                     ...prev,
+  //                     images: prev?.images?.filter(
+  //                       image => image?.name !== item?.name,
+  //                     ), // Replace `targetUri` with the specific URI to remove
+  //                   }));
+  //                 }}
+  //                 style={tw`bg-secondary rounded-full w-4 h-4 absolute top-1 right-1 items-center justify-center`}>
+  //                 <SvgXml xml={IconClose} />
+  //               </TouchableOpacity>
+  //             </View>
+  //           ))}
+  //         </View>
+  //       </View>
+
+  //       <View style={tw`mt-4`}>
+  //         <Text style={tw`text-black py-2`}>
+  //           {/* Titolo */}
+  //           Title
+  //         </Text>
+  //         <TextInput
+          
+  //           style={tw`bg-[#82A0A21A] h-10 rounded-lg px-4 font-RoboNormal`}
+  //           // placeholder={productData?.title}
+  //           // placeholderColor={'#949494'}
+  //           // label={'Titolo'}
+  //           value={productData?.title}
+  //           onChangeText={(text: any) =>
+  //             setProductData({
+  //               ...productData,
+  //               title: text,
+  //             })
+  //           }
+  //         />
+  //         <Text style={tw`text-black py-2`}>
+  //           {/* Descrivi il tuo prodotto */}
+  //           Describe your product
+  //         </Text>
+  //         <View style={tw`bg-[#82A0A21A] h-24 px-4 rounded-lg`}>
+  //           <TextArea
+  //             placeholder={"Enter the product description."}
+  //             // {'Inserisci la descrizione del prodotto'}
+  //             // placeholderColor={'#949494'}
+  //             // label={'Descrivi il tuo prodotto'}
+  //             value={data?.data?.description}
+  //             onChangeText={(text: any) =>
+  //               setProductData({
+  //                 ...productData,
+  //                 description: text,
+  //               })
+  //             }
+  //             style={tw` text-black`}
+  //             placeholderAlignment={'top'}
+  //           />
+  //         </View>
+  //         <Text style={tw`text-black py-2`}>
+  //           {/* Marchio */}
+  //           Brand
+  //         </Text>
+  //         <TextInput
+  //           // placeholder={'Inserisci la marca del prodotto'}
+  //           // placeholderColor={'#949494'}
+  //           // label={'Marchio'}
+  //           style={tw`bg-[#82A0A21A] h-10 rounded-lg px-4 font-RoboNormal`}
+  //           value={productData.brand}
+  //           onChangeText={(text: any) =>
+  //             setProductData({
+  //               ...productData,
+  //               brand: text,
+  //             })
+  //           }
+  //         />
+
+  //         <View style={tw`mb-2`}>
+  //           <Text style={[tw`text-title text-sm font-RoboMedium mb-1.5`]}>
+  //             {/* Condizione */}
+  //             Condition
+  //           </Text>
+  //           <RadioGroup
+  //             initialValue={productData?.condition}
+  //             // onValueChange={}
+  //             style={tw`flex-row items-center gap-4`}>
+  //             <RadioButton
+  //               onPress={() => {
+  //                 setProductData({
+  //                   ...productData,
+  //                   condition: 'new',
+  //                 });
+  //               }}
+  //               value={'new'}
+  //               color="#064145"
+  //               label={"New"}
+  //             // {'Nuova'}
+  //             />
+  //             <RadioButton
+  //               onPress={() => {
+  //                 setProductData({
+  //                   ...productData,
+  //                   condition: 'used',
+  //                 });
+  //               }}
+  //               value={'used'}
+  //               color="#064145"
+  //               label={"Used"}
+  //             // {'Usata'}
+  //             />
+  //           </RadioGroup>
+  //         </View>
+
+  //         <View style={tw`mb-2`}>
+  //           <Text style={[tw`text-title text-sm font-RoboMedium mb-1.5`]}>
+  //             {/* è il cibo? */}
+  //             Is it the food
+  //           </Text>
+  //           <RadioGroup
+  //             initialValue={productData?.is_food}
+  //             // onValueChange={setIsFood}
+  //             style={tw`flex-row items-center gap-4`}>
+  //             <RadioButton
+  //               onPress={() => {
+  //                 setProductData({
+  //                   ...productData,
+  //                   is_food: 'yes',
+  //                 });
+  //               }}
+  //               value={'yes'}
+  //               color="#064145"
+  //               label={'Yes'}
+  //             />
+  //             <RadioButton
+  //               onPress={() => {
+  //                 setProductData({
+  //                   ...productData,
+  //                   is_food: 'no',
+  //                 });
+  //               }}
+  //               value={'no'}
+  //               color="#064145"
+  //               label={'No'}
+  //             />
+  //           </RadioGroup>
+  //         </View>
+  //         <Text style={[tw`text-title text-sm font-RoboMedium mb-1.5`]}>
+  //           Peso
+  //         </Text>
+  //         {productData?.is_food === 'yes' && (
+
+  //           <TextInput
+  //             style={tw`bg-[#82A0A21A] rounded-lg px-4 font-RoboNormal`}
+  //             // placeholder={'Enter product weight'}
+  //             // placeholderColor={'#949494'}
+  //             value={productData?.weight}
+  //             // label={'Weight'}
+  //             onChangeText={(text: any) =>
+  //               setProductData({
+  //                 ...productData,
+  //                 weight: text,
+  //               })
+  //             }
+  //           />
+  //         )}
+  //         {!isLoading && (
+  //           <View style={tw`mt-4`}>
+  //             <Text style={tw`text-title text-sm font-RoboMedium mb-2`}>
+  //               {/* Categoria */}
+  //               Category
+  //             </Text>
+  //             <Dropdown
+  //               style={tw`bg-secondary py-3 px-2 rounded-xl text-title`}
+  //               data={categories?.data?.map(cat => ({
+  //                 label: cat.name,
+  //                 value: cat.id,
+  //               }))}
+  //               labelField="label"
+  //               containerStyle={tw`bg-white rounded-xl`}
+  //               selectedTextStyle={tw`text-title text-base font-RoboMedium`}
+  //               valueField="value"
+  //               placeholder="Select the product from the category."
+  //               // "selezionare il prodotto della categoria"
+  //               value={productData?.category_id}
+  //               activeColor="#F4FAFA"
+  //               onChange={item => {
+  //                 setCategoryId(item?.value);
+  //                 setProductData({
+  //                   ...productData,
+  //                   category_id: item.value,
+  //                 });
+  //               }}
+  //               search
+  //               searchPlaceholder="Search category"
+  //               // "cerca categoria"
+  //               placeholderStyle={tw`text-[#949494] text-base font-RoboMedium pl-2`}
+  //             />
+  //           </View>
+  //         )}
+
+
+  //         <View style={tw`mt-4 mb-2`}>
+  //           <Text style={tw`text-title text-sm font-RoboMedium mb-2`}>
+  //             {/* Sottocategoria */}
+  //             Sub Category
+  //           </Text>
+  //           <MultiSelect
+  //             style={tw`bg-secondary py-3 px-2 rounded-xl`}
+  //             data={
+  //               subCategories?.map(sub => ({
+  //                 label: sub?.name,
+  //                 value: sub?.id,
+  //               })) || []
+  //             } // Fallback to an empty array if subCategories is undefined
+  //             labelField="label"
+  //             valueField="value"
+  //             containerStyle={tw`bg-white rounded-xl`}
+  //             selectedTextStyle={tw`text-title text-base font-RoboMedium`}
+  //             placeholder="Seleziona le sottocategorie"
+  //             placeholderStyle={tw`text-[#949494] text-base font-RoboMedium pl-2`}
+  //             value={productData?.sub_category_id}
+  //             onChange={selectedItems => {
+  //               // Handle updated selected items
+  //               setProductData(prevData => ({
+  //                 ...prevData,
+  //                 sub_category_id: selectedItems || [], // Ensure selectedItems is always an array
+  //               }));
+  //             }}
+  //             search
+  //             searchPlaceholder="Search subcategory."
+  //             // "Cerca sottocategoria"
+  //             activeColor="#F4FAFA"
+  //             selectedStyle={tw`bg-primary100 border border-primary100 rounded-xl`}
+  //           />
+  //         </View>
+
+  //         <Text style={[tw`text-title text-sm font-RoboMedium mb-1.5`]}>Price
+
+  //         </Text>
+  //         <TextInput
+  //           placeholder={'€0.00'}
+  //           // placeholderColor={'#949494'}
+  //           // label={'Prezzo'}
+  //           style={tw`bg-[#82A0A21A] rounded-lg px-4 font-RoboNormal`}
+  //           value={productData?.price || ''}
+  //           onChangeText={(text: any) =>
+  //             setProductData({
+  //               ...productData,
+  //               price: text,
+  //             })
+  //           }
+  //         />
+  //       </View>
+  //       {profileData?.data?.stripe_account_id &&
+  //         profileData?.data?.stripe_account_id ? (
+  //         <Button
+  //           containerStyle={tw`mt-4 mb-2`}
+  //           title={"Update product"}
+  //           // {'Aggiorna Prodotto'}
+  //           onPress={() => handleUpload && handleUpload(productData)}
+  //         />
+  //       ) : (
+  //         <View style={tw`flex-row items-center mt-4 mb-2 relative`}>
+  //           <Button
+  //             buttonStyle={tw`bg-[red]`}
+  //             title="Get Connect"
+  //             onPress={handleGetConnect}
+  //           />
+  //           {openingWebview && (
+  //             <ActivityIndicator size="small" color="#0000ff" style={tw`ml-2 absolute top-9 left-5`} />
+  //           )}
+  //         </View>
+  //       )}
+  //     </View>
+
+  //     {/* <NormalModal
+  //         layerContainerStyle={tw`flex-1 justify-center items-center mx-5`}
+  //         containerStyle={tw`rounded-xl bg-white p-5`}
+  //         visible={stripePaymentVisble}
+  //         setVisible={setStripePaymentVisble}>
+  //         <Text style={tw`text-center text-title text-lg font-RoboMedium mb-4`}>
+  //           Give your card details
+  //         </Text>
+  //         <View style={tw`gap-y-2`}>
+  //           <InputText
+  //             placeholder="Card Number"
+  //             value={cardNumber}
+  //             onChangeText={setCardNumber}
+  //             keyboardType="number-pad"
+  //           />
+  //           <InputText
+  //             placeholder="MM/YY"
+  //             value={expiry}
+  //             onChangeText={setExpiry}
+  //             keyboardType="number-pad"
+  //           />
+  //           <InputText
+  //             placeholder="CVC"
+  //             value={cvc}
+  //             onChangeText={setCvc}
+  //             keyboardType="number-pad"
+  //             secureTextEntry
+  //           />
+  //         </View>
+  //         <Button title="Submit Payment" onPress={handlePayment} />
+  //       </NormalModal> */}
+  //   </View>
+  // );
+
   return (
     <View>
       <Text style={tw`text-title text-[20px] font-RoboMedium`}>
@@ -356,8 +703,8 @@ const ProductEditFields = ({
                 <Image
                   source={{ uri: item.uri }}
                   style={tw`${productData?.images[0] === item.uri
-                      ? 'w-16 h-16'
-                      : 'w-12 h-12'
+                    ? 'w-16 h-16'
+                    : 'w-12 h-12'
                     } rounded-lg ml-2`}
                 />
 
@@ -384,7 +731,7 @@ const ProductEditFields = ({
             Title
           </Text>
           <TextInput
-            style={tw`bg-[#82A0A21A] rounded-lg px-4 font-RoboNormal`}
+           style={tw`${colorScheme === 'dark' ? 'bg-[#82A0A21A]' : 'bg-[#82A0A21A]'} text-black rounded-lg px-4 font-RoboNormal h-10`}
             // placeholder={productData?.title}
             // placeholderColor={'#949494'}
             // label={'Titolo'}
@@ -400,7 +747,7 @@ const ProductEditFields = ({
             {/* Descrivi il tuo prodotto */}
             Describe your product
           </Text>
-          <View style={tw`bg-[#82A0A21A] px-4 rounded-lg`}>
+          <View style={tw`bg-[#82A0A21A] px-4 h-24 rounded-lg`}>
             <TextArea
               placeholder={"Enter the product description."}
               // {'Inserisci la descrizione del prodotto'}
@@ -425,7 +772,7 @@ const ProductEditFields = ({
             // placeholder={'Inserisci la marca del prodotto'}
             // placeholderColor={'#949494'}
             // label={'Marchio'}
-            style={tw`bg-[#82A0A21A] rounded-lg px-4 font-RoboNormal`}
+            style={tw`bg-[#82A0A21A] text-black rounded-lg h-10 px-4 font-RoboNormal`}
             value={productData.brand}
             onChangeText={(text: any) =>
               setProductData({
@@ -504,25 +851,25 @@ const ProductEditFields = ({
               />
             </RadioGroup>
           </View>
-          <Text style={[tw`text-title text-sm font-RoboMedium mb-1.5`]}>
-            Peso
+          <Text style={[tw`text-title text-sm  font-RoboMedium mb-1.5`]}>
+            Weight
           </Text>
-          {productData?.is_food === 'yes' && (
+          {/* {productData?.is_food === 'yes' && ( */}
 
-            <TextInput
-              style={tw`bg-[#82A0A21A] rounded-lg px-4 font-RoboNormal`}
-              // placeholder={'Enter product weight'}
-              // placeholderColor={'#949494'}
-              value={productData?.weight}
-              // label={'Weight'}
-              onChangeText={(text: any) =>
-                setProductData({
-                  ...productData,
-                  weight: text,
-                })
-              }
-            />
-          )}
+          <TextInput
+            style={tw`bg-[#82A0A21A] text-black h-10 rounded-lg px-4 font-RoboNormal`}
+            // placeholder={'Enter product weight'}
+            // placeholderColor={'#949494'}
+            value={productData?.weight}
+            // label={'Weight'}
+            onChangeText={(text: any) =>
+              setProductData({
+                ...productData,
+                weight: text,
+              })
+            }
+          />
+          {/* )} */}
           {!isLoading && (
             <View style={tw`mt-4`}>
               <Text style={tw`text-title text-sm font-RoboMedium mb-2`}>
@@ -601,7 +948,7 @@ const ProductEditFields = ({
             placeholder={'€0.00'}
             // placeholderColor={'#949494'}
             // label={'Prezzo'}
-            style={tw`bg-[#82A0A21A] rounded-lg px-4 font-RoboNormal`}
+            style={tw`bg-[#82A0A21A] text-black h-10 rounded-lg px-4 font-RoboNormal`}
             value={productData?.price || ''}
             onChangeText={(text: any) =>
               setProductData({
@@ -611,26 +958,26 @@ const ProductEditFields = ({
             }
           />
         </View>
-        {profileData?.data?.stripe_account_id &&
-          profileData?.data?.stripe_account_id ? (
-          <Button
-            containerStyle={tw`mt-4 mb-2`}
-            title={"Update product"}
-            // {'Aggiorna Prodotto'}
-            onPress={() => handleUpload && handleUpload(productData)}
-          />
-        ) : (
+        {/* {profileData?.data?.stripe_account_id &&
+          profileData?.data?.stripe_account_id ? ( */}
+        <Button
+          containerStyle={tw`mt-4 mb-2`}
+          title={loading ? "Updating..." : "Update product"}
+          // {'Aggiorna Prodotto'}
+          onPress={() => handleUpload && handleUpload(productData)}
+        />
+        {/* ) : (
           <View style={tw`flex-row items-center mt-4 mb-2 relative`}>
             <Button
               buttonStyle={tw`bg-[red]`}
-              title="Get Connect"
+              title="nnect"
               onPress={handleGetConnect}
             />
             {openingWebview && (
               <ActivityIndicator size="small" color="#0000ff" style={tw`ml-2 absolute top-9 left-5`} />
             )}
           </View>
-        )}
+        )} */}
       </View>
 
       {/* <NormalModal
@@ -666,6 +1013,7 @@ const ProductEditFields = ({
         </NormalModal> */}
     </View>
   );
+
 };
 
 export default React.memo(ProductEditFields);

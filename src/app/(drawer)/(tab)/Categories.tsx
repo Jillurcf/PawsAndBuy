@@ -1,6 +1,7 @@
 
 
 import { IconBottomArrow, IconTopArrow } from '@/src/assets/icons/Icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
@@ -150,10 +151,10 @@ const Categories = ({navigation}: any) => {
                         style={tw`py-2 border-b border-b-primary200`}
                         key={subIndex}
                         onPress={() =>
-                          navigation?.navigate('SubCategories', {
+                          router.push({pathname: '/screens/cateogries/SubCategoriesList', params: {
                           sub_category_id:subCate?.id,
                             title: subCate?.name,
-                          })
+                          }})
                         }>
                         <Text style={tw`text-subT text-sm font-RoboMedium`}>
                           {subCate?.name}

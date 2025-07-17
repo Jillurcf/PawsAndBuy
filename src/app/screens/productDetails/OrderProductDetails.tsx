@@ -1,136 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
-
-import { SvgXml } from 'react-native-svg';
-
 import { IconBack } from '@/src/assets/icons/Icons';
 import Button from '@/src/components/Button';
 import { CustomAlert } from '@/src/components/CustomAlert';
 import InputText from '@/src/components/InputText';
 import NormalModal from '@/src/components/NormalModal';
 import tw from '@/src/lib/tailwind';
-import { useGetMyOrderDetailsQuery, usePostSendOfferMutation, usePostWishlistMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { useGetMyOrderDetailsQuery, useLazyGetDownloadLabelQuery, useLazyGetGenerateLabelQuery, usePostSendOfferMutation, usePostWishlistMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { Buffer } from 'buffer';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+
+import * as Print from 'expo-print';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { SvgXml } from 'react-native-svg';
+import WebView from 'react-native-webview';
 
 
 
-const categories = [
-  {
-    cate: 'Cane',
-    icon: require('../../../assets/images/dog-cate-icon.png'),
-    subCate: [
-      {subCate: 'Vedi tutto'},
-      {subCate: 'Abbigliamento e accessori'},
-      {subCate: 'Collari e guinzagli'},
-      {subCate: 'Ciotole e alimentatori'},
-      {subCate: 'Toelettatura'},
-      {subCate: 'Letti e coperte'},
-      {subCate: 'Giochi'},
-      {subCate: 'Accessori per l’addestramento'},
-      {subCate: 'Trasportini e gabbie'},
-    ],
-  },
-  {
-    cate: 'Gatto',
-    icon: require('../../../assets/images/cat-cate-icon.png'),
-    subCate: [
-      {subCate: 'Vedi tutto'},
-      {subCate: 'Giochi'},
-      {subCate: 'Letti'},
-      {subCate: 'Abbigliamento e accessori'},
-      {subCate: 'Toelettatura'},
-      {subCate: 'Ciotole e alimentatori'},
-      {subCate: 'Collari e guinzagli'},
-      {subCate: 'Trasportini da viaggio'},
-    ],
-  },
-  {
-    cate: 'Piccoli Animali',
-    icon: require('../../../assets/images/rabit-cate-icon.png'),
-    subCate: [
-      {subCate: 'Vedi tutto'},
-      {subCate: 'Giochi'},
-      {subCate: 'Habitat e accessori'},
-    ],
-  },
-  {
-    cate: 'Pesci',
-    icon: require('../../../assets/images/fish-cate-icon.png'),
-    subCate: [
-      {subCate: 'Vedi tutto'},
-      {subCate: 'Decorazioni e accessori'},
-      {subCate: 'Attrezzature per acquari'},
-    ],
-  },
-  {
-    cate: 'Uccelli',
-    icon: require('../../../assets/images/bird-cate-icon.png'),
-    subCate: [
-      {subCate: 'Vedi tutto'},
-      {subCate: 'Gabbie e accessori'},
-      {subCate: 'Giochi'},
-    ],
-  },
-  {
-    cate: 'Rettili',
-    icon: require('../../../assets/images/lizard-cate-icon.png'),
-    subCate: [
-      {subCate: 'Vedi tutto'},
-      {subCate: 'Gabbie e accessori'},
-      {subCate: 'Giochi'},
-    ],
-  },
-];
+// Polyfill Buffer for React Native (iOS & Android)
+global.Buffer = global.Buffer || Buffer;
 
-const OrderProductDetails = ({navigation, route}: any) => {
-  // const images = [
-  //   require('../../assets/images/food-1.png'),
-  //   require('../../assets/images/food-2.png'),
-  //   require('../../assets/images/food-3.png'),
-  //   require('../../assets/images/food-4.png'),
-  //   require('../../assets/images/food-1.png'),
-  //   require('../../assets/images/food-2.png'),
-  //   require('../../assets/images/food-3.png'),
-  //   require('../../assets/images/food-4.png'),
-  // ];
+
+const OrderProductDetails = () => {
+
   const [alertVisible, setAlertVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isPriceModalVisible, setIsPriceModalVisible] = useState(false);
   const [acceptOfferModalVisible, setAcceptOfferModalVisible] = useState(false);
   const [openProductEditModal, setOpenProductEditModal] = useState(false);
   const [offerValue, setOfferValue] = useState();
+  const [pdfBase64, setPdfBase64] = useState<string | null>(null);
   // console.log('112', offerValue);
-  const {from} = route?.params || {};
+  // const { from } = route?.params || {};
 
-  const {id} = route?.params;
+  // const {id} = route?.params;
+  const { id, from } = useLocalSearchParams();
   console.log('121 id', id);
 
-  const {data, isLoading, isError, refetch} = useGetMyOrderDetailsQuery(id);
+  const { data, isLoading, isError, refetch } = useGetMyOrderDetailsQuery(id);
   // console.log('125', data?.data?.rating?.rating_user?.avatar);
-  const {data: similarProduct} = useGetMyOrderDetailsQuery(id);
+  const { data: similarProduct } = useGetMyOrderDetailsQuery(id);
   const [postWishlist, wishlistResult] = usePostWishlistMutation();
+  const [getGenerateLabel] = useLazyGetGenerateLabelQuery();
+  const [getDownloadLabel] = useLazyGetDownloadLabelQuery();
+
 
   useEffect(() => {
     // console.log('Product ID:', id);
     // Fetch product details using the id
   }, [id]);
-  console.log('data ++++', data?.data);
+  console.log('data ++++', data?.data?.shipping?.shipping_status);
   // const data =[1, 2, 3]
   // Function to handle image click
-  const handleImageClick = (index: number) => {
-    setSelectedImageIndex(index);
-  };
+  // const handleImageClick = (index: number) => {
+  //   setSelectedImageIndex(index);
+  // };
 
   const handleProductDetails = async id => {
     // console.log(id);
 
-    navigation?.navigate('ProductDetails', {id});
+    router.push('/screens/productDetails/ProductDetails', { id });
   };
 
   const [postSendOffer] = usePostSendOfferMutation();
@@ -154,7 +90,7 @@ const OrderProductDetails = ({navigation, route}: any) => {
       // Send the offer
       const res = await postSendOffer(formData).unwrap();
       if (res) {
-       setAlertVisible(true);
+        setAlertVisible(true);
       }
       console.log('res send offer', res);
     } catch (error) {
@@ -162,7 +98,7 @@ const OrderProductDetails = ({navigation, route}: any) => {
     }
   };
 
-  console.log('++++++++++++++++++++', wishlistResult);
+  // console.log('++++++++++++++++++++', wishlistResult);
 
   const handleFavorite = async () => {
     if (!id) {
@@ -195,7 +131,7 @@ const OrderProductDetails = ({navigation, route}: any) => {
     );
   }
 
-  
+
 
   const showCustomAlert = () => {
     setAlertVisible(true);
@@ -204,14 +140,118 @@ const OrderProductDetails = ({navigation, route}: any) => {
   const closeCustomAlert = () => {
     setAlertVisible(false);
   };
+
+  const handleGenerateLabel = async () => {
+    console.log("click");
+    const res = await getGenerateLabel(data?.data?.shipping?.parcel_id)
+    console.log(res?.data?.message, "label Generated +++++++++")
+    // setLabelGenerateStatus(res?.data?.message)
+  }
+  // const handleDownloadLabel = async () => {
+  //   console.log("click download label");
+  //   try {
+  //     const order_id = id;
+  //     const parcel_id = data?.data?.shipping?.parcel_id;
+  //     console.log(order_id, parcel_id, "order and percel id+++++++")
+
+  //     const res = await getDownloadLabel({ order_id: order_id, parcel_id: parcel_id })
+  //     // 1️⃣  Download the PDF as raw binary
+  //     console.log(res, "pdf download")
+  //     // 2️⃣  Convert to base64 so Expo FS can write it
+  //     const base64 = Buffer.from(res.data, 'binary').toString('base64');
+
+  //     // 3️⃣  Construct a local file path inside the app sandbox
+  //     const fileName = `label_${parcelId}.pdf`;
+  //     const fileUri = FileSystem.documentDirectory + fileName; // e.g. file:///data/...
+
+  //     // 4️⃣  Persist the file
+  //     await FileSystem.writeAsStringAsync(fileUri, base64, {
+  //       encoding: FileSystem.EncodingType.Base64,
+  //     });
+
+  //     console.log(`Label saved to: ${fileUri}`);
+  //     return fileUri;
+  //   } catch (err: any) {
+  //     console.log('Download error:', err.message);
+  //     Alert.alert('Error', 'Could not download label.');
+  //     return null;
+  //   }
+  // }
+
+
+  const handleDownloadLabel = async () => {
+    try {
+      const order_id = id as string;
+      const parcel_id = data?.data?.shipping?.parcel_id as string;
+      const base64String = await getDownloadLabel({ order_id, parcel_id }).unwrap();
+      setPdfBase64(base64String); // Serializable base64 string from RTK Query
+    } catch (err: any) {
+      console.error('Download error:', err?.message || err);
+      Alert.alert('Error', 'Could not download label.');
+    }
+  };
+
+  const handlePrintPdf = async () => {
+    try {
+      if (!pdfBase64) {
+        Alert.alert('Error', 'PDF not loaded');
+        return;
+      }
+
+      await Print.printAsync({
+        html: `<iframe src="${pdfBase64}" style="width:100%; height:100%; border:none;"></iframe>`,
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+      Alert.alert('Print Error', 'Failed to print PDF');
+    }
+  };
+
+  const renderPdfWebView = () => {
+    if (!pdfBase64) return null;
+
+    const htmlContent = `<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/><style>html,body{margin:0;padding:0;height:100%;}iframe{width:100%;height:100%;border:none;} </style></head><body><iframe src=\"${pdfBase64}\"></iframe></body></html>`;
+
+    return (
+      <>
+        <WebView
+          containerStyle={tw`flex-1 justify-center`}
+          originWhitelist={['*']}
+          source={{ html: htmlContent }}
+          style={tw`flex-1 ml-8 `}
+          startInLoadingState
+          renderLoading={() => (
+            <ActivityIndicator style={tw`flex-1`} size="large" color="#064145" />
+          )}
+        />
+        <View style={tw`items-center`}>
+          <Button onPress={handlePrintPdf} containerStyle={tw`w-80% mx-0 items-center`} title={"Print pdf"} />
+        </View>
+      </>
+    );
+  };
+
+  /* ------------------------------------------------------------------------ */
+  /*                                  RENDER                                  */
+  /* ------------------------------------------------------------------------ */
+  if (isLoading) {
+    return (
+      <View style={tw`flex-1 justify-center items-center`}>
+        <ActivityIndicator size="large" color="#064145" />
+        <Text style={tw`text-primary mt-2`}>Loading ....</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={tw`h-full bg-white px-[4%]`}>
       <TouchableOpacity
         style={tw`mt-4 flex-row items-center gap-2 pb-2`}
-        onPress={() => navigation?.goBack()}>
+        onPress={() => router.back()}>
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>
-          {'Cibo per cani'}
+          {/* {'Cibo per cani'} */}
+          Dog food
         </Text>
       </TouchableOpacity>
       <ScrollView
@@ -221,12 +261,12 @@ const OrderProductDetails = ({navigation, route}: any) => {
         <View>
           <View style={tw`bg-primary100 p-3 rounded-xl mt-4`}>
             {data?.data?.product &&
-             <Image
-             source={{uri: data?.data?.product?.images[0]}}
-             style={tw`w-full rounded-xl h-56`}
-           />
-        }
-           
+              <Image
+                source={{ uri: data?.data?.product?.images[0] }}
+                style={tw`w-full rounded-xl h-56`}
+              />
+            }
+
             {/*   
               <ScrollView
                 horizontal
@@ -270,7 +310,8 @@ const OrderProductDetails = ({navigation, route}: any) => {
             <View style={tw`mt-4 gap-y-2`}>
               <View style={tw`flex-row items-center justify-between`}>
                 <Text style={tw`text-subT text-sm font-RoboMedium`}>
-                  Marca:
+                  {/* Marca: */}
+                  Brand
                 </Text>
                 <Text style={tw`text-title text-sm font-RoboBold`}>
                   {data?.data?.product?.brand}
@@ -297,7 +338,8 @@ const OrderProductDetails = ({navigation, route}: any) => {
                 </View> */}
               <View style={tw`flex-row items-center justify-between`}>
                 <Text style={tw`text-subT text-sm font-RoboMedium`}>
-                  Prezzo:
+                  {/* Prezzo: */}
+                  Price
                 </Text>
                 <View style={tw`flex-row items-center gap-4`}>
                   <Text style={tw`text-subT text-xs font-RoboBold`}>
@@ -318,7 +360,8 @@ const OrderProductDetails = ({navigation, route}: any) => {
                 <>
                   <View style={tw`flex-row items-center justify-between`}>
                     <Text style={tw`text-title text-sm font-RoboMedium`}>
-                      Prezzo richiesto:
+                      {/* Prezzo richiesto: */}
+                      Requested price:
                     </Text>
                     <Text style={tw`text-title text-sm font-RoboBold`}>
                       $400
@@ -326,7 +369,8 @@ const OrderProductDetails = ({navigation, route}: any) => {
                   </View>
                   <View style={tw`flex-row items-center justify-between`}>
                     <Text style={tw`text-danger text-xs font-RoboMedium`}>
-                      Differenza:
+                      {/* Differenza: */}
+                      Difference:
                     </Text>
                     <Text style={tw`text-danger text-xs font-RoboBold`}>
                       -$56
@@ -418,17 +462,15 @@ const OrderProductDetails = ({navigation, route}: any) => {
                   </Text>
                   <TouchableOpacity
                     onPress={() =>
-                      navigation?.navigate(
-                        'similarProductList',
-                        {id},
-                        {
-                          // products: [...Array(10)],
-                          // title: 'Similar product',
-                        },
-                      )
+                      router.push({
+                        pathname:
+                          '/screens/product/similarProductList', params:
+                          { id: id },
+                      })
                     }>
                     <Text style={tw`text-primary text-xs font-RoboMedium`}>
-                      Vedi tutto
+                      {/* Vedi tutto */}
+                      View all
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -442,17 +484,17 @@ const OrderProductDetails = ({navigation, route}: any) => {
                       // onPress={() => navigation?.navigate('ProductDetails')}
                       onPress={() => handleProductDetails(d?.id)}>
                       {d?.images && <Image
-                        source={{uri: d?.images[0]}}
+                        source={{ uri: d?.images[0] }}
                         style={tw`h-38 w-full rounded-xl`}
                       />}
                       <TouchableOpacity style={tw`absolute top-5 right-5`}>
-                        {d?.user?.avatar && 
-                        <Image
-                        source={{uri: d?.user?.avatar}}
-                        style={tw`h-6 w-6 rounded-full`}
-                      />
+                        {d?.user?.avatar &&
+                          <Image
+                            source={{ uri: d?.user?.avatar }}
+                            style={tw`h-6 w-6 rounded-full`}
+                          />
                         }
-                        
+
                       </TouchableOpacity>
                       <View>
                         <View style={tw`flex-row justify-between mt-1`}>
@@ -467,7 +509,7 @@ const OrderProductDetails = ({navigation, route}: any) => {
                           <Text
                             style={tw`text-subT text-[10px] font-RoboNormal`}>
                             {/* Condizione */}
-                            Condition: 
+                            Condition:
                           </Text>
                           <Text
                             style={tw`text-primary text-[10px] font-RoboNormal`}>
@@ -491,7 +533,30 @@ const OrderProductDetails = ({navigation, route}: any) => {
                 </View>
               </View>
             ) : null}
+
+            {data?.data?.shipping?.shipping_status && data?.data?.shipping?.shipping_status === "Label Generated" ? (
+              <View style={tw` items-center`}>
+                <Button
+                  onPress={handleDownloadLabel}
+                  containerStyle={tw`w-[80%] my-[20%]`} title={"Download Label"} />
+              </View>
+            )
+              : (
+                <View style={tw` items-center`}>
+                  <Button
+                    onPress={handleGenerateLabel}
+                    containerStyle={tw`w-[80%] my-[20%]`} title={"Generate Label"} />
+                </View>
+              )
+            }
+
           </View>
+          {/* PDF WEBVIEW */}
+          <View style={{ height: pdfBase64 ? 500 : 0, marginTop: 16 }}>
+            {renderPdfWebView()}
+
+          </View>
+
           <NormalModal
             layerContainerStyle={tw`flex-1 justify-center items-center mx-5`}
             containerStyle={tw`rounded-xl bg-white p-5`}
@@ -499,7 +564,8 @@ const OrderProductDetails = ({navigation, route}: any) => {
             setVisible={setIsPriceModalVisible}>
             <View>
               <Text style={tw`text-title text-sm font-RoboBold mb-2`}>
-                Offer Prezzo
+                {/* Offer Prezzo */}
+                Offer price
               </Text>
               <InputText
                 value={offerValue}
@@ -512,7 +578,7 @@ const OrderProductDetails = ({navigation, route}: any) => {
                 <Button
                   title="Send"
                   onPress={handleSendOffer}
-                  // onPress={() => setIsPriceModalVisible(false)}
+                // onPress={() => setIsPriceModalVisible(false)}
                 />
                 <Button
                   title="Cancel"
@@ -557,54 +623,13 @@ const OrderProductDetails = ({navigation, route}: any) => {
               </View>
             </View>
             <CustomAlert
-        visible={alertVisible}
-        message="Offer sent"
-        onClose={closeCustomAlert}
-      />
+              visible={alertVisible}
+              message="Offer sent"
+              onClose={closeCustomAlert}
+            />
           </NormalModal>
 
-          {/* <NormalModal
-              layerContainerStyle={tw`flex-1 justify-center items-center mx-5`}
-              containerStyle={tw`rounded-xl bg-white p-5`}
-              visible={openProductEditModal}
-              setVisible={setOpenProductEditModal}>
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="always">
-                <ProductAddFields
-                  btnTitle="Update"
-                  title="Edit Product"
-                  setTitle={setTitle}
-                  setDesc={setDesc}
-                  setBrandName={setBrandName}
-                  handleSubCategorySelect={handleSubCategorySelect}
-                  selectedSubCategories={selectedSubCategories}
-                  setWeight={setWeight}
-                  isFood={isFood}
-                  setIsFood={setIsFood}
-                  setCondition={setCondition}
-                  condition={condition}
-                  openGallery={openGallery}
-                  imageUris={imageUris}
-                  removeImage={removeImage}
-                  categories={categories}
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-                  setSelectedSubCategories={setSelectedSubCategories}
-                  getSubCategories={getSubCategories}
-                  handlePayment={handlePayment}
-                  setCvc={setCvc}
-                  cvc={cvc}
-                  setExpiry={setExpiry}
-                  expiry={expiry}
-                  setCardNumber={setCardNumber}
-                  cardNumber={cardNumber}
-                  setStripePaymentVisble={setStripePaymentVisble}
-                  stripePaymentVisble={stripePaymentVisble}
-                  handleUpload={handleUpload}
-                />
-              </ScrollView>
-            </NormalModal> */}
+
         </View>
       </ScrollView>
     </View>

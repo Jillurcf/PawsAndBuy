@@ -26,13 +26,19 @@ const handleReadAndApproved = (item) => {
   console.log("item", item?.data?.offer_id)
     console.log("product id", item?.data?.product_id)
  if(item?.data?.type === "pending"){
-  navigation?.navigate('ApprovedProduct', {id:item?.data?.product_id, offer_id:item?.data?.offer_id});
+  router.push({pathname: '/screens/approvedProduct/ApprovedProduct', params: {id:item?.data?.product_id, offer_id:item?.data?.offer_id}});
  }else if(item?.data?.type === "buy"){
-  navigation?.navigate('SellOrder');
+  router.push('/(drawer)/SellOrder');
  
- }else if(item?.data?.type !== "pending"){
-  navigation?.navigate('AcceptedOfferPage', {id:item?.data?.product_id, offer_id:item?.data?.offer_id});
- }
+ } else if (item?.data?.type !== 'pending') {
+  router.push({
+    pathname: '/screens/approvedProduct/AcceptedOfferPage',
+    params: {
+      id: item?.data?.product_id,
+      offer_id: item?.data?.offer_id,
+    },
+  });
+}
  }catch(error){
 console.log(error)
  }

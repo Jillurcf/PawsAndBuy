@@ -153,6 +153,7 @@ import { IconBack, IconVerified } from '@/src/assets/icons/Icons';
 import InputText from '@/src/components/InputText';
 import tw from '@/src/lib/tailwind';
 import { useGetHomeRecommendedCollectionQuery } from '@/src/redux/api/apiSlice/apiSlice';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -225,8 +226,12 @@ console.log("Product==========",products)
   };
 
   const handleProductDetails = (id) => {
-    navigation?.navigate('ProductDetails', {id, from: "sellOrders"});
-  };
+  router.push({
+    pathname: '/screens/productDetails/ProductDetails',
+    params: { id, from: 'sellOrders' },
+  });
+};
+
 
   const renderItem = ({item}) => (
     <TouchableOpacity
@@ -303,7 +308,7 @@ console.log("Product==========",products)
     <View style={tw`h-full bg-white px-[4%] pb-4`}>
       <TouchableOpacity
         style={tw`mt-4 flex-row items-center gap-2`}
-        onPress={() => navigation?.goBack()}>
+        onPress={() => router.back()}>
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>
           {title || 'Recommended for your'}

@@ -30,55 +30,76 @@ import ImageResizer from 'react-native-image-resizer';
 // https://github.com/firebase/firebase-ios-sdk    this is ios sdk
 GoogleSignin.configure({
   //  androidClientId: '292720943978-3jvar6l48oabdo7b4gcqdnj23tl7gr3c.apps.googleusercontent.com', // client ID of type ANDROID for your app. Required to get the `idToken` on the user object, and for offline access
-  iosClientId:'292720943978-f6evamcqtna5665s7pqobpf2omrfmfr0.apps.googleusercontent.com',
+  iosClientId: '292720943978-f6evamcqtna5665s7pqobpf2omrfmfr0.apps.googleusercontent.com',
   webClientId:
     '292720943978-eem026vbf56jsrhnfcrrjf6jkkbp2ql7.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
   offlineAccess: true,
   forceCodeForRefreshToken: true,
 });
 
-const Login = ({navigation}: any) => {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isCheck, setIsCheck] = useState(false);
-  const [login, {isLoading, isError, error}] = useLoginMutation();
+  const [login, { isLoading, isError, error }] = useLoginMutation();
   const [googlelogin] = useGoogleloginMutation();
   const [googleUser, setGoogleUser] = useState();
   const [resizeImg, setResizeImg] = useState([]); // Initialize as an array
-
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [generalError, setGeneralError] = useState<string>('');
+console.log(fieldErrors, "fieldErrors+++++++++++++")
+  console.log(generalError, "generalError+++++++++++++")
   // console.log(email, password);
 
   const handleLogin = async () => {
     console.log('click');
-  
-    if (!email || !password) {
-      Alert.alert('Please fill in all fields');
-      return;
-    }
-  
-    const data = {email, password};
+
+    // if (!email || !password) {
+    //   Alert.alert('Please fill in all fields');
+    //   return;
+    // }
+
+    // const data = {email, password};
     const formData = new FormData();
     formData?.append("email", email)
     formData?.append("password", password)
     console.log(formData, "data++++++++++++++++")
     try {
       const res = await login(formData).unwrap();
-    
+
       console.log('response', res);
-      // if (res.status === "false" || !res.data?.data?.access_token) {
-      // Alert.alert(res?.error?.message || 'Invalid email or password')
-      // return;
-      // }
+      const errorData = res?.error?.message;
+      // Reset errors
+      setFieldErrors({});
+      setGeneralError('');
+
+      if (typeof errorData === 'string') {
+        // This is a general error (e.g., "User not found.")
+        setGeneralError(errorData);
+      } else if (typeof errorData === 'object') {
+        const errors: { email?: string; password?: string } = {};
+        if (Array.isArray(errorData.email) && errorData.email.length > 0) {
+          errors.email = errorData.email[0];
+        }
+        if (Array.isArray(errorData.password) && errorData.password.length > 0) {
+          errors.password = errorData.password[0];
+        }
+        setFieldErrors(errors);
+      }
+
+
       if (res.data?.access_token) {
         setStorageToken(res.data?.access_token);
         router?.replace('/screens/SplashScreen/LoadingSplashScreen');
       }
     } catch (error) {
       console.log('login failed', error);
+       setFieldErrors(error?.message)
+       setGeneralError(error?.message);
     }
     const token = getStorageToken();
-    console.log('token', token);
+    console.log('token +++++++++++++', token);
 
     if (token) {
       console.log('Token retrieved:', token);
@@ -114,7 +135,7 @@ const Login = ({navigation}: any) => {
           // Alert.alert('Image Processed', `Image saved at: ${resizedImage.uri}`);
         } catch (error) {
           console.error('Image Processing Error:', error);
-         console.log('Error', 'Failed to process the image.');
+          console.log('Error', 'Failed to process the image.');
         }
       };
 
@@ -134,10 +155,10 @@ const Login = ({navigation}: any) => {
 
       // }
       if (response?.data?.user) {
-        const {name, email, id: google_id, photo} = response?.data?.user;
+        const { name, email, id: google_id, photo } = response?.data?.user;
         // await navigation?.navigate('Drawer');
         // Set the Google user data for further processing
-        setGoogleUser({name, email, google_id, photo});
+        setGoogleUser({ name, email, google_id, photo });
         console.log('Google Sign-In Successful:', photo);
 
         // Resize the image if photo exists
@@ -192,8 +213,8 @@ const Login = ({navigation}: any) => {
           console.log('Upload Successful:', apiResponse?.data?.access_token);
 
           if (apiResponse?.data?.access_token) {
-           const res = setStorageToken(apiResponse?.data?.access_token);
-           console.log("google token", res)
+            const res = setStorageToken(apiResponse?.data?.access_token);
+            console.log("google token", res)
             router?.replace('/');
           }
         } catch (error) {
@@ -235,9 +256,9 @@ const Login = ({navigation}: any) => {
       }
     }
   };
-  
 
-  
+
+
   return (
     <View style={tw`px-[4%] pb-4 bg-white flex-1`}>
       <ScrollView
@@ -256,7 +277,7 @@ const Login = ({navigation}: any) => {
         <View style={tw``}>
           <Text style={tw`text-primary text-2xl font-RoboMedium`}>
             {/* Registrazione */}
-           Login
+            Login
           </Text>
           <Text style={tw`text-subT text-xs font-RobotoRegular mb-8`}>
             {/* Inserisci le informazioni corrette per effettuare l'accesso */}
@@ -265,6 +286,7 @@ const Login = ({navigation}: any) => {
 
           <View>
             <InputText
+              style={tw`h-10`}
               placeholder={
                 // 'Inserisci la tua email'
                 "Enter your email"
@@ -274,7 +296,13 @@ const Login = ({navigation}: any) => {
               iconLeft={IconEnvelope}
               onChangeText={(text: any) => setEmail(text)}
             />
+            {fieldErrors.email && (
+              <Text style={tw`text-red-500 text-xs mt-2`}>
+                {fieldErrors.email}*
+              </Text>
+            )}
             <InputText
+              style={tw`h-10`}
               placeholder={
                 // 'Inserisci la tua password'
                 "Enter your password"
@@ -287,6 +315,11 @@ const Login = ({navigation}: any) => {
               isShowPassword={!isShowPassword}
               rightIconPress={() => setIsShowPassword(!isShowPassword)}
             />
+            {fieldErrors.password && (
+              <Text style={tw`text-red-500 text-xs mt-2`}>
+                {fieldErrors.password}*
+              </Text>
+            )}
             <View style={tw`flex-row items-center justify-between`}>
               <TouchableOpacity
                 onPress={() => {
@@ -305,7 +338,7 @@ const Login = ({navigation}: any) => {
                 </Text> */}
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => navigation?.navigate('ForgetPass')}>
+                onPress={() => router?.push('/screens/Auth/ForgetPass')}>
                 <Text
                   style={tw`text-xs text-primary font-RoboMedium border-b border-b-primary`}>
                   {/* Hai dimenticato la password? */}
@@ -313,14 +346,19 @@ const Login = ({navigation}: any) => {
                 </Text>
               </TouchableOpacity>
             </View>
-
+            {/* General error message */}
+            {generalError ? (
+              <Text style={tw`text-red-500 text-xs mt-2`}>
+                {generalError?.email || generalError}
+              </Text>
+            ) : null}
             <Button
               containerStyle={tw`mt-6 bg-[#064145]`}
               title={'Login'}
               onPress={handleLogin}
-              // onPress={() => {
-              //   navigation?.navigate('Drawer');
-              // }}
+            // onPress={() => {
+            //   navigation?.navigate('Drawer');
+            // }}
             />
 
             <View style={tw`my-6 flex-row items-center gap-2`}>
@@ -351,7 +389,7 @@ const Login = ({navigation}: any) => {
         <View style={tw`flex-row items-center justify-center gap-2 mt-4`}>
           <Text style={tw`text-xs text-title font-RobotoMedium`}>
             {/* Non hai un account? */}
-            Do not have an account? 
+            Do not have an account?
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -364,7 +402,7 @@ const Login = ({navigation}: any) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      <StatusBar translucent={false}/>
+      <StatusBar translucent={false} />
     </View>
   );
 };

@@ -60,7 +60,7 @@
 //   };
 
 //   // const email = route?.params?.email;
- 
+
 //   const handleSendAgainOtp = async () => {
 //     setSeconds(119);
 //     setIsActive(true);
@@ -182,9 +182,9 @@ import Button from '@/src/components/Button';
 import { CustomAlert } from '@/src/components/CustomAlert';
 import tw from '@/src/lib/tailwind';
 import { useForgetpassMutation, useOtpVerifyMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Image,
   ScrollView,
   Text,
@@ -198,28 +198,31 @@ interface ErrorResponse {
   };
 }
 
-const VerifyOtp = ({navigation, route}: any) => {
+const VerifyOtp = () => {
   const [otp, setOtp] = useState<string>('');
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const inputs = useRef<Array<TextInput | null>>([]);
   // const [email, setEmail] = useState("");
-  const [otpVerify, {isLoading, isError}] = useOtpVerifyMutation();
+  const [otpVerify, { isLoading, isError }] = useOtpVerifyMutation();
   const [forgetpass,] = useForgetpassMutation()
   // console.log("211", email, otp); 
-const {from} = route?.params || {}
+  // const { from } = route?.params || {}
+  const { email, from } = useLocalSearchParams();
+
   const [seconds, setSeconds] = useState(119);
   const [isActive, setIsActive] = useState(true);
-const email = route?.params?.email
-console.log("216", email);
-const [alertVisible, setAlertVisible] = useState(false);
+  
+  console.log("216", email);
+  const [alertVisible, setAlertVisible] = useState(false);
+    const [otpError, setOtpError] = useState('');
 
-const showCustomAlert = () => {
-  setAlertVisible(true);
-};
+  const showCustomAlert = () => {
+    setAlertVisible(true);
+  };
 
-const closeCustomAlert = () => {
-  setAlertVisible(false);
-};
+  const closeCustomAlert = () => {
+    setAlertVisible(false);
+  };
   const handleChangeText = (text: string, index: number) => {
     if (text.length > 1) {
       text = text.slice(-1);
@@ -234,7 +237,7 @@ const closeCustomAlert = () => {
     }
   };
 
-  const handleKeyPress = ({nativeEvent}: any, index: number) => {
+  const handleKeyPress = ({ nativeEvent }: any, index: number) => {
     if (nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
       inputs.current[index - 1]?.focus();
     }
@@ -243,30 +246,30 @@ const closeCustomAlert = () => {
   const handleSendAgainOtp = async () => {
     setSeconds(119);
     setIsActive(true);
-     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-       if (!emailRegex.test(email)) {
-         console.log('Error', 'Please enter a valid email address.');
-         return;
-       }
-     
-       try {
-         console.log("Sending payload:", { email }); // Log the payload for debugging
-         const response = await forgetpass({ email }).unwrap(); // Pass email as an object
-         console.log("Response received:", response);
-     
-         if (response?.status) {
-           setAlertVisible(true);
-           navigation?.navigate('VerifyOtp');
-         } else {
-           console.log('Error', response?.message || 'Failed to send OTP.');
-         }
-       } catch (err) {
-         console.log("Error details:", JSON.stringify(err, null, 2));
-         console.log(
-           'Error',
-           err?.data?.message?.email?.join(', ') || err?.data?.message || 'An unexpected error occurred.'
-         );
-       }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log('Error', 'Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      console.log("Sending payload:", { email }); // Log the payload for debugging
+      const response = await forgetpass({ email }).unwrap(); // Pass email as an object
+      console.log("Response received:", response);
+
+      if (response?.status) {
+        setAlertVisible(true);
+        navigation?.navigate('VerifyOtp');
+      } else {
+        console.log('Error', response?.message || 'Failed to send OTP.');
+      }
+    } catch (err) {
+      console.log("Error details:", JSON.stringify(err, null, 2));
+      console.log(
+        'Error',
+        err?.data?.message?.email?.join(', ') || err?.data?.message || 'An unexpected error occurred.'
+      );
+    }
 
   };
 
@@ -289,7 +292,7 @@ const closeCustomAlert = () => {
   // };
 
   const allFilled = otp.length === 6 && otp.split('').every(item => item !== '');
-  const data = { email, otp};
+  const data = { email, otp };
   console.log("89", data);
 
   // const handleSendOtp = async () => {
@@ -297,10 +300,10 @@ const closeCustomAlert = () => {
   //   try {
   //     // Unwrap response from RTK Query mutation
   //     const response = await otpVerify(data).unwrap();
-  
+
   //     // Process the successful response
   //     console.log("response", response);
-  
+
   //     // Example: If the response contains user information or a token
   //     if (response) {
   //       console.log("OTP Verified Successfully!");
@@ -310,7 +313,7 @@ const closeCustomAlert = () => {
   //       } else {
   //         navigation.navigate("Login");
   //       }
-       
+
   //     } else {
   //       console.error("OTP verification failed:", response.message);
   //     }
@@ -321,40 +324,35 @@ const closeCustomAlert = () => {
   // };
 
   const handleSendOtp = async () => {
-  console.log("click");
-  try {
-    // Unwrap response from RTK Query mutation
-    const response = await otpVerify(data).unwrap();
+    console.log("click");
+    try {
+      // Unwrap response from RTK Query mutation
+      const response = await otpVerify(data).unwrap();
 
-    // Process the successful response
-    console.log("response", response);
+      // Process the successful response
+      console.log("response", response);
 
-    // Navigate based on 'from' condition
-    if (response) {
-      console.log("OTP Verified Successfully!");
-      if (from === 'signup') {
-        navigation.navigate("Login"); // Navigate to Login if from signup
+      // Navigate based on 'from' condition
+      if (response?.status === true) {
+        console.log("OTP Verified Successfully!");
+        if (from === 'signup') {
+         router.push("/screens/Auth/Login"); // Navigate to Login if from signup
+        } else {
+          router.push({pathname: "/screens/Auth/CreateNewPass", params: { email: email }}); // Otherwise, go to CreateNewPass
+        }
       } else {
-        navigation.navigate("CreateNewPass", { email }); // Otherwise, go to CreateNewPass
+        console.error("OTP verification failed:", response?.message);
+         setOtpError(response.message || 'OTP verification failed. Please try again.');
       }
-    } else {
-      console.error("OTP verification failed:", response?.message);
+    } catch (err) {
+      // Log error details for debugging
+      console.error("Error verifying OTP:", err);
+       setOtpError(err?.message || 'OTP verification failed. Please try again.');
     }
-  } catch (err) {
-    // Log error details for debugging
-    console.error("Error verifying OTP:", err);
-  }
-};
+  };
+
 
   
-  if (isLoading) {
-    return (
-      <View style={tw`flex-1 justify-center items-center`}>
-        <ActivityIndicator size="large" color="#064145" />
-        <Text style={tw`text-primary mt-2`}>Loading products...</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={tw`bg-white h-full p-[4%]`}>
@@ -390,9 +388,8 @@ const closeCustomAlert = () => {
                   onKeyPress={e => handleKeyPress(e, index)}
                   onFocus={() => setFocusedIndex(index)}
                   onBlur={() => setFocusedIndex(null)}
-                  style={tw`${
-                    focusedIndex === index ? 'border-primary' : 'border-title'
-                  } border-[1px] rounded-2xl flex-1 h-16 font-extrabold text-center text-4xl font-RoboBold text-primary`}
+                  style={tw`${focusedIndex === index ? 'border-primary' : 'border-title'
+                    } border-[1px] rounded-2xl flex-1 h-16 font-extrabold text-center text-4xl font-RoboBold text-primary`}
                   keyboardType="numeric"
                   selectionColor={'#064145'}
                   placeholderTextColor={'#949494'}
@@ -402,7 +399,11 @@ const closeCustomAlert = () => {
                 />
               ))}
             </View>
-
+            {otpError && (
+              <Text style={tw`text-red-500 text-xs mt-2`}>
+                {otpError}
+              </Text>
+            )}
             <Button
               disabled={!allFilled}
               title={

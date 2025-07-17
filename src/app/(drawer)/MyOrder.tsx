@@ -1,5 +1,5 @@
 
-import { IconBack, IconSearch } from '@/src/assets/icons/Icons';
+import { IconSearch } from '@/src/assets/icons/Icons';
 import InputText from '@/src/components/InputText';
 import MyOrderReview from '@/src/components/MyOrderReview';
 import tw from '@/src/lib/tailwind';
@@ -14,11 +14,10 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { SvgXml } from 'react-native-svg';
 
 
 
-const MyOrder = ({navigation, route}: any) => {
+const MyOrder = ({ route }: any) => {
   const [searchItem, setSearchItem] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
@@ -26,10 +25,10 @@ const MyOrder = ({navigation, route}: any) => {
   const [hasMore, setHasMore] = useState(true);
   const [postCreateRatings] = usePostCreateRatingsMutation();
 
-  const {title} = route?.params || {};
+  const { title } = route?.params || {};
 
   // Fetch data using useGetMyOrderQuery
-  const {data, isLoading, isFetching} = useGetMyOrderQuery({
+  const { data, isLoading, isFetching } = useGetMyOrderQuery({
     per_page: 20,
     page: currentPage,
   });
@@ -67,10 +66,15 @@ const MyOrder = ({navigation, route}: any) => {
     }
   };
 
-  const handleProductDetails = id => {
-    navigation?.navigate('ProductDetails', {id});
-    console.log('221', id);
-  };
+  // const handleProductDetails = id => {
+  //   // router.push('/screens/productDetails/OrderProductDetails', {id:id});
+  //   router.push({
+  //     pathname: '/screens/productDetails/ProductDetails',
+  //     params: { id: id },
+  //   });
+
+  //   console.log('221', id);
+  // };
   const [ratings, setRatings] = useState(0);
   console.log(ratings)
   const [review, setReview] = useState();
@@ -82,21 +86,21 @@ const MyOrder = ({navigation, route}: any) => {
     console.log("item", item?.product_id)
     console.log("item1", item?.seller_id)
     console.log("click")
-    try{
-        const formData = new FormData()
-    formData.append("rating", ratings)
-    formData.append("review", review)
-    formData.append("products_id", item?.product_id )
-    formData.append("seller_id", item?.seller_id )
-    console.log("formData++++++++++", formData)
-    const res = await postCreateRatings(formData).unwrap()
-    console.log("254", res)
-    }catch(error) {
-        console.log(error)
-    }    
+    try {
+      const formData = new FormData()
+      formData.append("rating", ratings)
+      formData.append("review", review)
+      formData.append("products_id", item?.product_id)
+      formData.append("seller_id", item?.seller_id)
+      console.log("formData++++++++++", formData)
+      const res = await postCreateRatings(formData).unwrap()
+      console.log("254", res)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  
+
   if (isLoading) {
     return (
       <View style={tw`flex-1 justify-center items-center`}>
@@ -110,7 +114,7 @@ const MyOrder = ({navigation, route}: any) => {
       <TouchableOpacity
         style={tw`mt-8 flex-row items-center gap-2`}
         onPress={() => router?.back()}>
-        <SvgXml xml={IconBack} />
+        {/* <SvgXml xml={IconBack} /> */}
         <Text style={tw`text-title text-base font-RoboMedium`}>
           {/* {title || 'Seller Collection'} */}
           My orders
@@ -120,6 +124,7 @@ const MyOrder = ({navigation, route}: any) => {
       {/* Search Bar */}
       <View style={tw`mt-3`}>
         <InputText
+        style={tw`h-10`}
           value={searchItem}
           onChangeText={value => setSearchItem(value)}
           placeholder="Search"
@@ -145,7 +150,7 @@ const MyOrder = ({navigation, route}: any) => {
           showsVerticalScrollIndicator={false}
         />
       )}
-      <StatusBar translucent={false}/>
+      <StatusBar translucent={false} />
     </View>
   );
 };

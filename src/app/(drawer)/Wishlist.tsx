@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  ScrollView,
   Text,
   TouchableOpacity,
   View
@@ -44,7 +45,7 @@ const WishList = ({navigation, route}: any) => {
   // Filter products based on search input
 
   const handleProductDetails = id => {
-    navigation?.navigate('ProductDetails', {id, from: 'wishList'});
+    router.push({pathname: '/screens/productDetails/ProductDetails', params: {id, from: 'wishList'}});
     console.log('221', id);
   };
   const [ratings, setRatings] = useState(0);
@@ -87,23 +88,24 @@ const WishList = ({navigation, route}: any) => {
       {isLoading && products.length === 0 ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <FlatList
+        <View style={tw`flex-1 mb-4`}>
+          <FlatList
           data={data?.data?.data}
           // renderItem={renderItem}
           renderItem={({item}) => {
             console.log("item",item)
             return (
              
-                <View
-                  style={tw`flex-row items-center flex-wrap justify-between w-full`}>
+                <ScrollView
+                  style={tw` w-[50%] p-2 `}>
                   <TouchableOpacity
-                    style={tw`w-[50%] rounded-xl mb-5 p-2 bg-primary100`}
+                    style={tw`w-[100%] rounded-xl p-4 bg-primary100`}
                     //   key={index}
                     onPress={() => handleProductDetails(item?.id)}>
                     {item?.images && (
                       <Image
                         source={{uri: item?.images?.[0]}}
-                        style={tw`w-full h-full rounded-xl`}
+                        style={tw`w-full h-90%] rounded-xl`}
                       />
                     )}
                     <View>
@@ -154,7 +156,7 @@ const WishList = ({navigation, route}: any) => {
                             /> */}
                     </TouchableOpacity>
                   </TouchableOpacity>
-                </View>
+                </ScrollView>
          
             );
           }}
@@ -167,6 +169,7 @@ const WishList = ({navigation, route}: any) => {
           // }
           showsVerticalScrollIndicator={false}
         />
+        </View>
       )}
       <StatusBar translucent={false} />
     </View>

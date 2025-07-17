@@ -4,50 +4,65 @@ import InputText from '@/src/components/InputText';
 import NormalModal from '@/src/components/NormalModal';
 import tw from '@/src/lib/tailwind';
 import { usePostResetPasswordMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, View } from 'react-native';
+import { Image, ScrollView, Text, View } from 'react-native';
 
 
 
 
 
-const CreateNewPass = ({navigation, route}: any) => {
+const CreateNewPass = () => {
   const [password, setPassword] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [isShowPassword, setIsShowPassword] = useState(true);
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(true);
   const [isCongratsModalVisible, setIsCongratsModalVisible] = useState(false);
-  const [postResetPassword, {isLoading, isError}] = usePostResetPasswordMutation();
-  const email = route?.params?.email;
-  console.log('216', email);
+  const [postResetPassword, { isLoading, isError }] = usePostResetPasswordMutation();
+  const [fieldErrors, setFieldErrors] = useState<{
+    password?: string;
+    c_password?: string;
+  }>({});
 
-  const handleSumbit = async () => {
-    console.log('click');
-    try {
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('password', password);
-      formData.append('c_password', confirmPass);
-      console.log('formData', formData);
-      const res = await postResetPassword(formData).unwrap();
-      if(res) {
-        navigation.navigate('Login')
-        console.log("password changed")
-      }
-      console.log(res)
-    } catch (error) {
-      console.log(error);
+console.log(fieldErrors, "fieldErrors");
+
+  const { email } = useLocalSearchParams();
+  // console.log('216', email);
+
+ const handleSumbit = async () => {
+  try {
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('c_password', confirmPass);
+
+    const res = await postResetPassword(formData).unwrap();
+
+    if (res?.status === true) {
+      setIsCongratsModalVisible(true);
     }
-  };
+  } catch (error: any) {
+    console.log('error from catch', error);
+     setFieldErrors(error?.message);
 
-  if (isLoading) {
-    return (
-      <View style={tw`flex-1 justify-center items-center`}>
-        <ActivityIndicator size="large" color="#064145" />
-        <Text style={tw`text-primary mt-2`}>Loading products...</Text>
-      </View>
-    );
+    const errorData = error?.message;
+    const errors: { password?: string; c_password?: string } = {};
+
+    if (errorData) {
+      if (Array.isArray(errorData.password)) {
+        errors.password = errorData.password[0];
+      }
+
+      if (Array.isArray(errorData.c_password)) {
+        errors.c_password = errorData.c_password[0];
+      }
+    }
+
+    setFieldErrors(errors);
   }
+};
+
+
 
   return (
     <View style={tw`px-[4%] pb-4 bg-white h-full justify-between flex-col`}>
@@ -70,6 +85,7 @@ const CreateNewPass = ({navigation, route}: any) => {
 
           <View>
             <InputText
+              style={tw`h-10`}
               placeholder={'Enter New password'}
               placeholderColor={'#949494'}
               label={'New Password'}
@@ -80,7 +96,13 @@ const CreateNewPass = ({navigation, route}: any) => {
               rightIconPress={() => setIsShowPassword(!isShowPassword)}
             />
 
+            {fieldErrors.password && (
+              <Text style={tw`text-red-500 text-xs mt-2`}>
+                {fieldErrors.password}*
+              </Text>
+            )}
             <InputText
+              style={tw`h-10`}
               placeholder={'Enter Confirm password'}
               placeholderColor={'#949494'}
               label={'Confirm Password'}
@@ -92,14 +114,18 @@ const CreateNewPass = ({navigation, route}: any) => {
                 setIsShowConfirmPassword(!isShowConfirmPassword)
               }
             />
-
+            {fieldErrors.c_password && (
+              <Text style={tw`text-red-500 text-xs mt-2`}>
+                {fieldErrors.c_password}*
+              </Text>
+            )}
             <Button
               containerStyle={tw`mt-6`}
               title={'Submit'}
-              onPress={ handleSumbit}
-              // onPress={() => {
-              //   setIsCongratsModalVisible(true);
-              // }}
+              onPress={handleSumbit}
+            // onPress={() => {
+            //   setIsCongratsModalVisible(true);
+            // }}
             />
           </View>
         </View>
@@ -121,7 +147,7 @@ const CreateNewPass = ({navigation, route}: any) => {
               title={'Done'}
               onPress={() => {
                 setIsCongratsModalVisible(false);
-                navigation.navigate('Login');
+                router.push('/screens/Auth/Login');
               }}
             />
           </View>

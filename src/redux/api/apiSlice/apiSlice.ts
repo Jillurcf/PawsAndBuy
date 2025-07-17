@@ -41,9 +41,9 @@ export const api = createApi({
     login: builder.mutation({
       query: (data) => ({
         url: '/auth/login',
-         headers : {
+        headers: {
           'Content-Type': 'multipart/form-data'
-      },
+        },
         method: 'POST',
         body: data,
       }),
@@ -52,9 +52,9 @@ export const api = createApi({
     googlelogin: builder.mutation({
       query: (data) => ({
         url: '/auth/social-login',
-        headers : {
+        headers: {
           'Content-Type': 'multipart/form-data'
-      },
+        },
         method: 'POST',
         body: data,
       }),
@@ -75,26 +75,26 @@ export const api = createApi({
       }),
     }),
     getHomeSlider: builder.query({
-  query: () => ({
-    url: '/slider', // Endpoint URL for the home slider
-  }),
-}),
-    
-getHomeRecommended: builder.query<RecommendedResponse, void>({
-  query: () => ({
-    url: '/home-page',
-    params: { per_page: 10, type: 'recommended' },
-  }),
-  providesTags: ["Products", "Notifications"]
-}),
+      query: () => ({
+        url: '/slider', // Endpoint URL for the home slider
+      }),
+    }),
 
-getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, string>({
-  query: (id) => ({
-    url: '/similar-product',
-    params: { per_page: 2, product_id: id },
-  }),
-  providesTags: ["Products"]
-}),
+    getHomeRecommended: builder.query<RecommendedResponse, void>({
+      query: () => ({
+        url: '/home-page',
+        params: { per_page: 10, type: 'recommended' },
+      }),
+      providesTags: ["Products", "Notifications"]
+    }),
+
+    getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, string>({
+      query: (id) => ({
+        url: '/similar-product',
+        params: { per_page: 2, product_id: id },
+      }),
+      providesTags: ["Products"]
+    }),
 
     // getHomeRecommendedCollection: builder.query({
     //   query: () => `/home-page?type=search&per_page=10&search=Lead Division Designer`
@@ -107,7 +107,7 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
       }),
       providesTags: ["Products"]
     }),
-    
+
     getHomeSellerCollection: builder.query({
       query: (args = {}) => {
         const { type = 'seller-collection', per_page = 10, page = 1, search = '' } = args;
@@ -126,17 +126,17 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     }),
     getCategoryList: builder.query({
       query: () => ({
-        url:`/category`
+        url: `/category`
       })
     }),
     getAllCategoryList: builder.query({
       query: (id) => ({
-        url:`/home-page?type=search&category_id=${id}`
+        url: `/home-page?type=search&category_id=${id}`
       })
     }),
     getSubCategoryList: builder.query({
       query: (id) => ({
-        url:`/home-page?sub_category_id=${id}&type=search`
+        url: `/home-page?sub_category_id=${id}&type=search`
       })
     }),
     getNotifications: builder.query({
@@ -190,13 +190,13 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
       }),
       providesTags: ['Profile'], // Tags for cache invalidation
     }),
-    
+
     postEditProfile: builder.mutation({
       query: (data) => ({
         url: `/edit-profile`,
-        headers : {
+        headers: {
           'Content-Type': 'multipart/form-data'
-      },
+        },
         method: 'POST',
         body: data,
       }),
@@ -213,9 +213,9 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     postChangePassword: builder.mutation({
       query: (data) => ({
         url: '/change-password',
-        headers : {
+        headers: {
           'Content-Type': 'multipart/form-data'
-      },
+        },
         method: 'POST',
         body: data,
       }),
@@ -241,9 +241,9 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     postResetPassword: builder.mutation({
       query: (data) => ({
         url: '/auth/reset-password',
-        headers : {
+        headers: {
           'Content-Type': 'multipart/form-data'
-      },
+        },
         method: 'POST',
         body: data,
       }),
@@ -282,20 +282,20 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
       }),
       providesTags: ['Products'],
     }),
-    
+
     getReviews: builder.query({
       query: () => ({
         url: '/rating', // Endpoint URL
       }),
     }),
     posUpdateProduct: builder.mutation({
-      query: ({formData, id}) => {
-        console.log("asdfasdfasdf",id)
+      query: ({ formData, id }) => {
+        console.log("asdfasdfasdf", id)
         return ({
           url: `/product/${id}`,
-          headers : {
+          headers: {
             'Content-Type': 'multipart/form-data'
-        },
+          },
           method: 'POST',
           body: formData,
         })
@@ -305,19 +305,26 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     postAddProduct: builder.mutation({
       query: (data) => ({
         url: '/product',
-        headers : {
+        headers: {
           'Content-Type': 'multipart/form-data'
-      },
+        },
         method: 'POST',
         body: data,
       }),
       invalidatesTags: ["Products"]
     }),
+     getValidationZipCode: builder.query({
+      query: (zip) => ({
+        url: `https://api.postcodes.io/postcodes/${zip}/validate`,
+        method: 'GET',
+      }),
+    }),
+
     postBuyProduct: builder.mutation({
       query: (data) => ({
         url: '/buy-product-intent',
-        headers : {
-            'Content-Type': 'multipart/form-data'
+        headers: {
+          'Content-Type': 'multipart/form-data'
         },
         method: 'POST',
         body: data,
@@ -326,8 +333,8 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     postBuyProductBackend: builder.mutation({
       query: (data) => ({
         url: '/payment',
-        headers : {
-            'Content-Type': 'multipart/form-data'
+        headers: {
+          'Content-Type': 'multipart/form-data'
         },
         method: 'POST',
         body: data,
@@ -337,10 +344,10 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     postSendOffer: builder.mutation({
       query: (data) => ({
         url: '/asking-offer',
-        headers : {
-            'Content-Type': 'multipart/form-data'
+        headers: {
+          'Content-Type': 'multipart/form-data'
         },
-        
+
         method: 'POST',
         body: data,
       }),
@@ -350,8 +357,8 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     postProductPromotionIntent: builder.mutation({
       query: (data) => ({
         url: '/product-promotion-intent',
-        headers : {
-            'Content-Type': 'multipart/form-data'
+        headers: {
+          'Content-Type': 'multipart/form-data'
         },
         method: 'POST',
         body: data,
@@ -360,8 +367,8 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
     postProductPromotionBackend: builder.mutation({
       query: (data) => ({
         url: '/product-promotion/71',
-        headers : {
-            'Content-Type': 'multipart/form-data'
+        headers: {
+          'Content-Type': 'multipart/form-data'
         },
         method: 'POST',
         body: data,
@@ -371,15 +378,15 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
       query: (id) => ({
         url: `/product/${id}`,
         method: 'DELETE',
-       }),
+      }),
       invalidatesTags: ['Products'],
     }),
     // create connect
     postCreateConnect: builder.mutation({
       query: (email) => ({
         url: '/create-connected-account',
-        headers : {
-            'Content-Type': 'multipart/form-data'
+        headers: {
+          'Content-Type': 'multipart/form-data'
         },
         method: 'POST',
         body: email,
@@ -387,10 +394,18 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
       // invalidatesTags: ['Profile']
     }),
 
-    // Drawer EndPoint
+    // ====================Drawer EndPoint ===============
+
     getMyOrder: builder.query({
       query: () => ({
         url: '/order',
+        params: { type: 'my_orders' }, // Use `params` for query parameters
+      }),
+      providesTags: ['Products'],
+    }),
+    getTrackParcel: builder.query({
+      query: (id) => ({
+        url: `/sendcloud/track-parcel/${id}`,
         params: { type: 'my_orders' }, // Use `params` for query parameters
       }),
       providesTags: ['Products'],
@@ -409,30 +424,70 @@ getHomeProductDetailsSimilarProduct: builder.query<SimilarProductResponse, strin
       }),
       providesTags: ['Products'],
     }),
-    // Ratings
-postCreateRatings: builder.mutation({
-  query: (data) => ({
-    url: '/rating',
-    headers : {
-      'Content-Type': 'multipart/form-data'
-  },
-    method: 'POST',
-    body: data,
-  }),
-  invalidatesTags: ['Profile']
-}),
-postHelpCenter: builder.mutation({
-  query: (data) => ({
-    url: '/help-center',
-    headers : {
-      'Content-Type': 'multipart/form-data'
-  },
-    method: 'POST',
-    body: data,
-  }),
-  invalidatesTags: ['Profile']
-}),
-   
+    getGenerateLabel: builder.query({
+      query: (id) => ({
+        url: `/sendcloud/generate-label/${id}`,
+        // params: { type: 'my_orders' }, // Use `params` for query parameters
+      }),
+      providesTags: ['Products'],
+    }),
+    // getDownloadLabel: builder.query<ArrayBuffer, { order_id: number; parcel_id: number }>({
+    //   query: ({ order_id, parcel_id }) => ({
+    //     url: '/sendcloud/label-download',
+    //     params: { order_id, parcel_id },
+    //     responseHandler: (response) => response.arrayBuffer(), // 👈 tells fetch to treat as binary
+    //     // optional: set responseType too
+    //     responseType: 'arraybuffer',
+    //   }),
+    //   keepUnusedDataFor: 0, // remove data from store immediately
+    //   // Optional: don't cache at all
+    //   serializeQueryArgs: () => '',
+    // }),
+
+    getDownloadLabel: builder.query<string, { order_id: string; parcel_id: string }>({
+      query: ({ order_id, parcel_id }) => ({
+        url: '/sendcloud/label-download',
+        params: { order_id, parcel_id },
+        responseHandler: (response) => response.arrayBuffer(),
+        responseType: 'arraybuffer',
+      }),
+      transformResponse: (arrayBuffer: ArrayBuffer) => {
+        const uint8Array = new Uint8Array(arrayBuffer);
+        let binary = '';
+        for (let i = 0; i < uint8Array.length; i++) {
+          binary += String.fromCharCode(uint8Array[i]);
+        }
+        return `data:application/pdf;base64,${btoa(binary)}`;
+      },
+    }),
+
+
+
+
+    // Ratings =============== ++++++++++++++ ===============
+    postCreateRatings: builder.mutation({
+      query: (data) => ({
+        url: '/rating',
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Profile']
+    }),
+    postHelpCenter: builder.mutation({
+      query: (data) => ({
+        url: '/help-center',
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Profile']
+    }),
+
     // postWishlist: builder.mutation({
     //   query: (data) => ({
     //     url: `/add-to-wishlist`,
@@ -458,30 +513,30 @@ postHelpCenter: builder.mutation({
 
     getWishList: builder.query({
       query: () => ({
-        url:`/get-wishlist?per_page=10`
+        url: `/get-wishlist?per_page=10`
       })
     }),
     getFaq: builder.query({
       query: () => ({
-        url:`/faq`
+        url: `/faq`
       })
     }),
     getTermsAndCondition: builder.query({
       query: () => ({
-        url:`/setting?type=Terms and Conditions`
+        url: `/setting?type=Terms and Conditions`
       })
     }),
     getLegalNote: builder.query({
       query: () => ({
-        url:`/setting?type=Legal Notes`
+        url: `/setting?type=Legal Notes`
       })
     }),
     geOurtPlatForm: builder.query({
       query: () => ({
-        url:`/setting?type=Our Platform`
+        url: `/setting?type=Our Platform`
       })
     }),
-   postLogOut: builder.mutation({
+    postLogOut: builder.mutation({
       query: () => ({
         url: `/logout`,
         method: 'POST',
@@ -491,7 +546,7 @@ postHelpCenter: builder.mutation({
     getCheckConnect: builder.query<string, string>({
       query: (email) => ({
         url: `/check-connect/${email}`,
-      
+
       }),
     }),
     checkToken: builder.mutation({
@@ -512,22 +567,22 @@ postHelpCenter: builder.mutation({
   }),
 });
 
-export const { 
+export const {
   useSignupMutation,
-  useLoginMutation, 
+  useLoginMutation,
   useGoogleloginMutation,
   useGetProfileQuery,
-usePostEditProfileMutation,
-usePostChangePasswordMutation,
+  usePostEditProfileMutation,
+  usePostChangePasswordMutation,
   useGetwardrobeProductListQuery,
-useGetReviewsQuery,
+  useGetReviewsQuery,
   useForgetpassMutation,
   useOtpVerifyMutation,
   useGetHomeSliderQuery,
-  useGetHomeRecommendedQuery, 
+  useGetHomeRecommendedQuery,
   useGetHomeSellerCollectionQuery,
-  useGetHomeProductDetailsQuery,                                         
-  useGetHomeProductDetailsSimilarProductQuery,                                   
+  useGetHomeProductDetailsQuery,
+  useGetHomeProductDetailsSimilarProductQuery,
   useGetHomeSearchQuery,
   useGetCategoryListQuery,
   useGetSubCategoryListQuery,
@@ -549,18 +604,23 @@ useGetReviewsQuery,
   useGetMarkSingleNotificationsQuery,
   useLazyGetMarkAllleNotificationsQuery,
   useGetOfferPirzeQuery,
-usePsotAcceptRejectOfferMutation,
-usePostCreateRatingsMutation,
-usePostResetPasswordMutation,
-usePostHelpCenterMutation,
-useGetMyOrderDetailsQuery,
-useGetAcceptOrRejectQuery,
-usePosUpdateProductMutation,
-useLazyGetCheckTokenQuery,
-useGetWishListQuery,
-useGetFaqQuery,
-useGetTermsAndConditionQuery,
-useGetLegalNoteQuery,
-useGeOurtPlatFormQuery,
-useGetCheckConnectQuery,
+  usePsotAcceptRejectOfferMutation,
+  usePostCreateRatingsMutation,
+  usePostResetPasswordMutation,
+  usePostHelpCenterMutation,
+  useGetMyOrderDetailsQuery,
+  useGetAcceptOrRejectQuery,
+  usePosUpdateProductMutation,
+  useLazyGetCheckTokenQuery,
+  useGetWishListQuery,
+  useGetFaqQuery,
+  useGetTermsAndConditionQuery,
+  useGetLegalNoteQuery,
+  useGeOurtPlatFormQuery,
+  useGetCheckConnectQuery,
+  useLazyGetGenerateLabelQuery,
+  useLazyGetDownloadLabelQuery,
+  useLazyGetTrackParcelQuery,
+  useGetValidationZipCodeQuery,
+  useLazyGetValidationZipCodeQuery
  } = api;

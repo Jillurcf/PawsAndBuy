@@ -2,6 +2,7 @@ import { IconBack, IconSearch, IconVerified } from '@/src/assets/icons/Icons';
 import InputText from '@/src/components/InputText';
 import tw from '@/src/lib/tailwind';
 import { useGetHomeSellerCollectionQuery } from '@/src/redux/api/apiSlice/apiSlice';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,9 +15,9 @@ import {
 import { SvgXml } from 'react-native-svg';
 
 
-
-const SellerProductList = ({ navigation, route }) => {
-  const { title } = route?.params || {};
+const SellerProductList = () => {
+  // const { title } = route?.params || {};
+  const {title} = useLocalSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
@@ -65,7 +66,7 @@ const SellerProductList = ({ navigation, route }) => {
   };
 
   const handleProductDetails = (id) => {
-    navigation?.navigate('ProductDetails', { id, from: 'sellOrders' });
+   router.push({pathname: '/screens/productDetails/ProductDetails', params: { id: id, from: 'sellOrders' }});
   };
 
   const renderItem = ({ item }) => (
@@ -128,7 +129,7 @@ const SellerProductList = ({ navigation, route }) => {
     <View style={tw`h-full bg-white px-[4%] pb-4`}>
       <TouchableOpacity
         style={tw`mt-4 flex-row items-center gap-2`}
-        onPress={() => navigation?.goBack()}
+        onPress={() => router.back()}
       >
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>

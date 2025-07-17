@@ -2,6 +2,7 @@ import { IconBack, IconVerified } from '@/src/assets/icons/Icons';
 import InputText from '@/src/components/InputText';
 import tw from '@/src/lib/tailwind';
 import { useGetSubCategoryListQuery } from '@/src/redux/api/apiSlice/apiSlice';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -21,7 +22,7 @@ const SubCategoriesList = ({navigation, route}: any) => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
-  const {title, sub_category_id} = route?.params || {};
+  const {title, sub_category_id} = useLocalSearchParams();
 
   // Fetch data using useGetSubCategoryListQuery
   const {data, isLoading, isError, isFetching, refetch} =
@@ -68,7 +69,7 @@ const SubCategoriesList = ({navigation, route}: any) => {
   };
 
   const handleProductDetails = id => {
-    navigation?.navigate('ProductDetails', {id, from: 'sellOrders'});
+    router.push({pathname: '/screens/productDetails/ProductDetails', params: {id:id, from: 'sellOrders'}});
   };
 
   const renderItem = ({item}) => (
@@ -146,7 +147,7 @@ const SubCategoriesList = ({navigation, route}: any) => {
     <View style={tw`h-full bg-white px-[4%] pb-4`}>
       <TouchableOpacity
         style={tw`mt-4 flex-row items-center gap-2`}
-        onPress={() => navigation?.goBack()}>
+        onPress={() => router.back()}>
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>
           {title || 'Recommended for your'}

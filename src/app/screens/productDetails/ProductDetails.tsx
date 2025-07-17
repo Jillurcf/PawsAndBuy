@@ -15,28 +15,31 @@ import InputText from '@/src/components/InputText';
 import NormalModal from '@/src/components/NormalModal';
 import tw from '@/src/lib/tailwind';
 import { useGetHomeProductDetailsQuery, useGetHomeProductDetailsSimilarProductQuery, usePostSendOfferMutation, usePostWishlistMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import { router, useLocalSearchParams } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
 
 
 
-const ProductDetails = ({navigation, route}: any) => {
+const ProductDetails = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isPriceModalVisible, setIsPriceModalVisible] = useState(false);
   const [acceptOfferModalVisible, setAcceptOfferModalVisible] = useState(false);
   const [openProductEditModal, setOpenProductEditModal] = useState(false);
   const [offerValue, setOfferValue] = useState();
   // console.log('112', offerValue);
-  const {from} = route?.params || {};
-  console.log("from", from)
-  console.log('Checking: ', route.params);
+  // const {from} = route?.params || {};
+  // console.log("from", from)
+  // console.log('Checking: ', route.params);
   // const data = route?.params?.recomend
   // const { id } = from; // Access the 'id' from params
-  const {id} = route?.params;
-  // console.log('115', id);
+  // const {id} = route?.params;
+  const { id, from } = useLocalSearchParams();
+    console.log("from", from)
+  console.log('115', id);
 
   const {data, isLoading, isError, refetch} = useGetHomeProductDetailsQuery(id);
-  console.log('125', data?.data?.rating?.rating_user?.avatar);
+  console.log('125++++++++++++++++++++++++=======', data?.data?.shipping_method?.name);
   const {data: similarProduct} =
     useGetHomeProductDetailsSimilarProductQuery(id);
   const [postWishlist, wishlistResult] = usePostWishlistMutation();
@@ -156,7 +159,7 @@ const ProductDetails = ({navigation, route}: any) => {
   const handleProductDetails = async id => {
     // console.log(id);
 
-    navigation?.navigate('ProductDetails', {id, from: 'similar_product'});
+    router.push({pathname: '/screens/productDetails/ProductDetails', params: {id, from: 'similar_product'}});
   };
 
   const [postSendOffer] = usePostSendOfferMutation();
@@ -224,7 +227,7 @@ const ProductDetails = ({navigation, route}: any) => {
     <View style={tw`h-full bg-white px-[4%]`}>
       <TouchableOpacity
         style={tw`mt-4 flex-row items-center gap-2 pb-2`}
-        onPress={() => navigation?.goBack()}>
+        onPress={() => router.back()}>
         <SvgXml xml={IconBack} />
         <Text style={tw`text-title text-base font-RoboMedium`}>
           {
@@ -242,7 +245,7 @@ const ProductDetails = ({navigation, route}: any) => {
             {data?.data?.images && (
               <Image
                 source={{uri: data?.data?.images[0]}}
-                style={tw`w-full rounded-xl w-full h-56`}
+                style={tw`w-full rounded-xl h-56`}
               />
             )}
 
@@ -372,22 +375,22 @@ const ProductDetails = ({navigation, route}: any) => {
                     ? 'Buy Now'
                     : from === 'wishList'
                     ? 'Buy Now'
-                    : 'Modifica prodotto'
+                    : 'Update Product'
                 }
                 containerStyle={tw`border border-primary`}
                 onPress={() => {
                   from === 'admin'
                     ? setAcceptOfferModalVisible(true)
                     : from === 'sellOrders'
-                    ? navigation?.navigate('Payment', {id})
+                    ? router.push({pathname: '/screens/payment/Payment', params: {id: id, shipingMethodId: data?.data?.shipping_method?.shipping_id, shippingMethodName: data?.data?.shipping_method?.name}})
                     : from === 'myOrders'
-                    ? navigation?.navigate('Payment', {id})
+                    ? router.push({pathname: '/screens/payment/Payment', params: {id: id, shipingMethodId: data?.data?.shipping_method?.shipping_id, shippingMethodName: data?.data?.shipping_method?.name}})
                     : from === 'similar_product'
-                    ? navigation?.navigate('Payment', {id})
+                    ? router.push({pathname: '/screens/payment/Payment', params: {id: id, shipingMethodId: data?.data?.shipping_method?.shipping_id, shippingMethodName: data?.data?.shipping_method?.name}})
                     :from === 'Own Product'
-                    ? navigation?.navigate('EditProduct', {id})
+                    ? router.push({pathname: '/screens/addProducts/EditProduct', params: {id: id, shipingMethodId: data?.data?.shipping_method?.shipping_id, shippingMethodName: data?.data?.shipping_method?.name}})
                     :from === 'wishList'
-                    ? navigation?.navigate('Payment', {id})
+                    ? router.push({pathname: '/screens/payment/Payment', params: {id: id, shipingMethodId: data?.data?.shipping_method?.shipping_id, shippingMethodName: data?.data?.shipping_method?.name}})
                     : setOpenProductEditModal(true);
                 }}
               />
@@ -461,14 +464,10 @@ const ProductDetails = ({navigation, route}: any) => {
                   </Text>
                   <TouchableOpacity
                     onPress={() =>
-                      navigation?.navigate(
-                        'similarProductList',
-                        {id},
-                        {
-                          // products: [...Array(10)],
-                          // title: 'Similar product',
-                        },
-                      )
+                      router.push({pathname:
+                        '/screens/product/ProductList', params:
+                        {id: id},}
+                       )
                     }>
                     <Text style={tw`text-primary text-xs font-RoboMedium`}>
                       {/* Vedi tutto */}

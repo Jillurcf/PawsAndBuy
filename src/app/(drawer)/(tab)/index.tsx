@@ -13,6 +13,7 @@ import Swiper from 'react-native-swiper';
 
 
 import { IconSearch, IconVerified } from '@/src/assets/icons/Icons';
+import { router } from 'expo-router';
 import Header from '../../../components/Header';
 import InputText from '../../../components/InputText';
 import { NavigProps } from '../../../interface/NaviProps';
@@ -297,11 +298,12 @@ const Home = ({navigation}: NavigProps<null>) => {
 
   const handleProductDetails = async id => {
     // console.log("304", id)
-    navigation?.navigate('ProductDetails', {id, from: 'myOrders'});
+    
+    router.push({pathname: '/screens/productDetails/ProductDetails', params: {id: id, from: 'myOrders'}});
   };
 
   const handleSellerProductDetails = async id => {
-    navigation?.navigate('ProductDetails', {id, from: 'sellOrders'});
+    router.push({pathname: '/screens/productDetails/ProductDetails', params: {id, from: 'sellOrders'}});
   };
   const handleFavorite = () => {
     console.log('click');
@@ -339,6 +341,7 @@ const Home = ({navigation}: NavigProps<null>) => {
         {/* Search Bar */}
         <View style={tw`mt-3`}>
           <InputText
+          style={tw`h-10`}
             value={searchItem}
             onChangeText={value => setSearchItem(value)}
             placeholder=
@@ -383,7 +386,7 @@ const Home = ({navigation}: NavigProps<null>) => {
               Recommended for you.
             </Text>
             <TouchableOpacity
-              onPress={() => navigation?.navigate('ProductList')}>
+              onPress={() => router.push('/screens/product/ProductList')}>
               <Text style={tw`text-primary text-xs font-RoboMedium`}>
                 {/* Vedi tutto */}
                 See all
@@ -461,7 +464,7 @@ const Home = ({navigation}: NavigProps<null>) => {
               Pickup from the seller.
             </Text>
             <TouchableOpacity
-              onPress={() => navigation?.navigate('SellerProductList')}>
+              onPress={() => router.push('/screens/product/SellerProductList')}>
               <Text style={tw`text-primary text-xs font-RoboMedium`}>
                 {/* Vedi tutto */}
                 See all

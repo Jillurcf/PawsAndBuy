@@ -1,21 +1,23 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  Alert,
   Image,
+  ScrollView,
+  StyleSheet,
+  Text,
   // Button,
   TextInput,
-  StyleSheet,
-  ScrollView,
-  Alert,
+  TouchableOpacity,
+  View
 } from "react-native";
 
-import tw from "twrnc"; // Tailwind styling library
-import { usePostCreateRatingsMutation } from "../redux/api/apiSlice/apiSlice";
-import StarRating from "react-native-star-rating-widget";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
+import * as WebBrowser from 'expo-web-browser';
+import StarRating from "react-native-star-rating-widget";
+import tw from "twrnc"; // Tailwind styling library
 import Button from '../components/Button';
+import { useLazyGetTrackParcelQuery, usePostCreateRatingsMutation } from "../redux/api/apiSlice/apiSlice";
 import { CustomAlert } from "./CustomAlert";
 
 const MyOrderReview = ({
@@ -30,23 +32,28 @@ const MyOrderReview = ({
   const [postCreateRatings] = usePostCreateRatingsMutation();
   const [ratings, setRatings] = useState(0);
   const [review, setReview] = useState("");
+  const [noReview, setNoReview] = useState(false);
   const { title } = route?.params || {};
-const navigation = useNavigation()
-const [alertVisible, setAlertVisible] = useState(false);
+  const navigation = useNavigation()
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [getTrackParcel] = useLazyGetTrackParcelQuery();
+  const reviewText = review;
+  const showCustomAlert = () => {
+    setAlertVisible(true);
+  };
 
-const showCustomAlert = () => {
-  setAlertVisible(true);
-};
-
-const closeCustomAlert = () => {
-  setAlertVisible(false);
-};
+  const closeCustomAlert = () => {
+    setAlertVisible(false);
+  };
   const handleProductDetails = (id: number) => {
     if (!id) {
       console.error("Product ID is undefined");
       return;
     }
-    navigation?.navigate("OrderProductDetails", { id });
+    router.push({
+      pathname: "/screens/productDetails/OrderProductDetails",
+      params: { id: id }
+    });
     console.log("Navigating to ProductDetails with ID:", id);
   };
 
@@ -56,8 +63,15 @@ const closeCustomAlert = () => {
   };
 
   const handleSubmitReview = async (item: any) => {
+    console.log(item?.shipping?.parcel_id, "item +++++++++++++++++")
     console.log("Submitting review for Product ID:", item?.product_id);
     console.log("Seller ID:", item?.seller_id);
+    setNoReview(true);
+    if (!reviewText) {
+
+      return console.error("Review text is empty");
+
+    }
 
     try {
       const formData = new FormData();
@@ -69,7 +83,8 @@ const closeCustomAlert = () => {
       console.log("Form Data:", formData);
 
       const response = await postCreateRatings(formData).unwrap();
-      if(response){
+      console.log(response, "Response from API");
+      if (response?.status === true) {
         setAlertVisible(true)
       }
       console.log("Response:", response);
@@ -79,11 +94,28 @@ const closeCustomAlert = () => {
     }
   };
 
+  const handleTrackParcel = async () => {
+  console.log("handle track parcel click");
+
+  const resTrackParcel = await getTrackParcel(item?.shipping?.parcel_id);
+  console.log(resTrackParcel, "resTrackParcel +++++++++++++++++++");
+
+  const trackingUrl = resTrackParcel?.data?.tracking?.tracking_url;
+  console.log(trackingUrl, "tracking url+++++++++++++");
+
+  if (trackingUrl) {
+    // Recommended: open in external browser to bypass security headers
+    await WebBrowser.openBrowserAsync(trackingUrl);
+  } else {
+    Alert.alert("Error", "Tracking URL not available.");
+  }
+};
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity
         style={tw`border border-gray-200 rounded-xl mb-2 bg-primary100 ml-1 p-2`}
-        onPress={() => handleProductDetails(item?.id)}
+      // onPress={() => handleProductDetails(item?.id)}
       >
         {item?.product?.images && (
           <Image
@@ -94,12 +126,12 @@ const closeCustomAlert = () => {
 
         <TouchableOpacity style={tw`absolute top-5 right-5`}>
           {item?.seller?.avatar &&
-          <Image
-          source={{ uri: item?.seller?.avatar }}
-          style={tw`h-6 w-6 rounded-full`}
-        />
+            <Image
+              source={{ uri: item?.seller?.avatar }}
+              style={tw`h-6 w-6 rounded-full`}
+            />
           }
-          
+
         </TouchableOpacity>
 
         <View>
@@ -132,14 +164,23 @@ const closeCustomAlert = () => {
             </View>
           </View>
 
-          <View style={tw`my-2`}>
-            <StarRating
-              rating={ratings}
-              onChange={(newRating: number) => handleRatingChange(newRating)}
-              starSize={20}
-              fullStarColor="#FFD700"
-              emptyStarColor="#DDD"
-            />
+          <View style={tw``}>
+            <View style={tw`my-2 w-[70%]`}>
+              <StarRating
+                rating={ratings}
+                onChange={(newRating: number) => handleRatingChange(newRating)}
+                starSize={20}
+                fullStarColor="#FFD700"
+                emptyStarColor="#DDD"
+              />
+            </View>
+            <View style={tw`w-[100%]`}>
+              <TouchableOpacity
+                onPress={handleTrackParcel}
+                style={tw`border border-yellow-600 rounded-2xl items-center p-1`}>
+                <Text style={tw`text-black text-xs`}>Track parcel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={tw`my-4`}>
@@ -152,14 +193,19 @@ const closeCustomAlert = () => {
               multiline
             />
           </View>
+          {!reviewText && noReview && (
+            <Text style={tw`text-red-500 text-xs`}>
+              Please enter your review*.
+            </Text>
+          )}
 
           <View style={tw``}>
-          <Button
-          
-            title="Submit Review"
-            onPress={() => handleSubmitReview(item)}
-            color="#064145"
-          />
+            <Button
+
+              title="Submit Review"
+              onPress={() => handleSubmitReview(item)}
+              color="#064145"
+            />
           </View>
         </View>
       </TouchableOpacity>

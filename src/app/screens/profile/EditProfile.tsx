@@ -1,21 +1,23 @@
-// 
-
-import { IconBack, IconCloseEye, IconEdit, IconKey, IconOpenEye, IconTik } from '@/src/assets/icons/Icons';
+// imports...
+import {
+  IconBack, IconCloseEye, IconEdit, IconKey, IconOpenEye, IconTik
+} from '@/src/assets/icons/Icons';
 import Button from '@/src/components/Button';
 import InputText from '@/src/components/InputText';
 import NormalModal from '@/src/components/NormalModal';
 import tw from '@/src/lib/tailwind';
-import { useGetProfileQuery, usePostChangePasswordMutation, usePostEditProfileMutation } from '@/src/redux/api/apiSlice/apiSlice';
+import {
+  useGetProfileQuery,
+  usePostChangePasswordMutation,
+  usePostEditProfileMutation
+} from '@/src/redux/api/apiSlice/apiSlice';
 import { launchImageLibraryAsync } from 'expo-image-picker';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
-// import {launchImageLibrary} from 'react-native-image-picker';
-
-
-const EditProfile = ({navigation}: any) => {
-  // State declarations
+const EditProfile = () => {
   const [username, setUsername] = useState('');
   const [location, setLocation] = useState('');
   const [oldPassword, setOldPassword] = useState('');
@@ -26,58 +28,35 @@ const EditProfile = ({navigation}: any) => {
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
   const [imageUri, setImageUri] = useState<any>(null);
   const [saveChangesModalVisible, setSaveChangesModalVisible] = useState(false);
-console.log("38", imageUri)
-  // API hooks
-  const {data: profileData, isLoading, isError} = useGetProfileQuery();
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const [generalError, setGeneralError] = useState('');
+  console.log(generalError, 'generalError');
+
+  const { data: profileData } = useGetProfileQuery({});
   const [postEditProfile] = usePostEditProfileMutation();
   const [postChangePassword] = usePostChangePasswordMutation();
 
-  // Log profile data for debugging
-  console.log('ProfileData', oldPassword, newPassword, confirmPassword);
+  const handleAccessGallery = async () => {
+    const result = await launchImageLibraryAsync({
+      mediaTypes: 'Images',
+      allowsEditing: true,
+      quality: 1,
+    });
 
-  // Form data
-  const data = {
-    name: username,
-    address: location,
-    image: imageUri,
+    if (!result.canceled && result.assets?.length > 0) {
+      const uri = result.assets.map(asset => asset.uri);
+      setImageUri(uri);
+    }
   };
 
-  // console.log('Form Data:', data);
-
-  // Handle image picker
-  const handleAccessGallery = () => {
-    launchImageLibraryAsync(
-      {
-        mediaType: 'photo',
-        quality: 1,
-      },
-      response => {
-        if (response.didCancel) {
-          console.log('User cancelled gallery picker');
-        } else if (response.errorCode) {
-          console.error('Gallery Error:', response.errorMessage);
-        } else if (response.assets) {
-          const uri = response.assets.map(asset => asset.uri);
-          setImageUri(uri);
-        }
-      },
-    );
-  };
-
-  // console.log('Selected Image URI:', imageUri);
-
-  // Handle save profile
   const handleSaveProfile = async () => {
     try {
       const formData = new FormData();
-  
-      // Add name and address to FormData
       formData.append('name', username || profileData?.data?.name);
       formData.append('address', location || profileData?.data?.address);
-  
-      // Add image to FormData (if available)
-      if (imageUri && imageUri.length > 0) {
-        const fileUri = imageUri[0]; // Assuming single image
+
+      if (imageUri?.length > 0) {
+        const fileUri = imageUri[0];
         const fileName = fileUri.split('/').pop();
         const fileType = `image/${fileName?.split('.').pop()}`;
         formData.append('image', {
@@ -86,161 +65,166 @@ console.log("38", imageUri)
           type: fileType,
         });
       }
-  
-      console.log('Form Data:', formData);
-  
+
       const response = await postEditProfile(formData).unwrap();
-      console.log('Profile Updated Successfully:', response);
-  
-      if (response) {
-        setSaveChangesModalVisible(true);
-      }
-    } catch (error) {
-      console.error('Failed to save profile:', error);
+      if (response) setSaveChangesModalVisible(true);
+    } catch (error: any) {
+      const messages = error?.message || {};
+      const parsedErrors: { [key: string]: string } = {};
+      Object.keys(messages).forEach((field) => {
+        parsedErrors[field] = Array.isArray(messages[field])
+          ? messages[field][0]
+          : messages[field];
+      });
+      setFieldErrors(parsedErrors);
     }
   };
-  
-  // handle password
+
   const handleChangePassword = async () => {
-    console.log("click");
-  
-    // Prepare the payload
     const payload = {
       current_password: oldPassword,
       new_password: newPassword,
       c_password: confirmPassword,
     };
-  
-    console.log("updatePassword", payload);
-  
-    try {
-      // Call the mutation directly with the payload
-      const response = await postChangePassword(payload).unwrap();
-  
-      console.log("change password", response);
-  
-      // Show success modal
-      setSaveChangesModalVisible(true);
-    } catch (error) {
-      // Handle errors
-      console.log("Error changing password:", error);
-  
-      if (error?.data?.message) {
-        console.error("Validation errors:", error.data.message);
-      }
-    }
-  };
-  
 
+    try {
+      const response = await postChangePassword(payload).unwrap();
+      setFieldErrors({});
+      setGeneralError('');
+      setSaveChangesModalVisible(true);
+    } catch (error: any) {
+  console.log('Raw error:', JSON.stringify(error, null, 2));
+
+  const message = error?.error?.message || error?.message;
+
+  if (typeof message === 'string') {
+    setGeneralError(message); // ✅ safe to render
+  } else if (typeof message === 'object') {
+    // Optional: Convert first field to string message
+    const firstKey = Object.keys(message)[0];
+    setGeneralError(message[firstKey]);
+  } else {
+    setGeneralError('Something went wrong. Please try again.');
+  }
+
+  // Also set field-specific errors
+  const parsedErrors: { [key: string]: string } = {};
+  if (typeof message === 'object') {
+    Object.keys(message).forEach((field) => {
+      parsedErrors[field] = Array.isArray(message[field])
+        ? message[field][0]
+        : message[field];
+    });
+    setFieldErrors(parsedErrors);
+  }
+}
+
+  }
   return (
     <View style={tw`bg-white px-[4%] h-full pb-2`}>
-      <ScrollView
-        keyboardShouldPersistTaps="always"
-        showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={tw`flex-row items-center py-2`}>
-          <TouchableOpacity
-            style={tw`flex-row items-center gap-2`}
-            onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={tw`flex-row items-center gap-2`} onPress={() => router.back()}>
             <SvgXml xml={IconBack} />
-            <Text style={tw`text-title text-base font-RoboMedium`}>Profilo</Text>
+            <Text style={tw`text-title text-base font-RoboMedium`}>Profile</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Profile Picture */}
+        {/* Profile Image */}
         <View style={tw`mt-4 items-center`}>
           <View>
             <Image
-            
-              source={{uri: imageUri?.length ? imageUri[0] : profileData?.data?.avatar}}
+              source={{ uri: imageUri?.length ? imageUri[0] : profileData?.data?.avatar }}
               style={tw`h-18 w-18 rounded-full`}
             />
             <TouchableOpacity
-              style={tw`absolute bottom-2 right-[-2] bg-primary w-7 h-7 rounded-full flex-row items-center justify-center gap-1`}
+              style={tw`absolute bottom-2 right-[-2] bg-primary w-7 h-7 rounded-full items-center justify-center`}
               onPress={handleAccessGallery}>
               <SvgXml xml={IconEdit} height={16} width={16} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Form Inputs */}
+        {/* Edit Profile Fields */}
         <View style={tw`mt-4`}>
           <InputText
-            placeholder={profileData?.data?.name || 'Entra con il nome'}
-            placeholderColor={'#949494'}
+            style={tw`h-10`}
+            placeholder={profileData?.data?.name || 'Enter your name'}
             label={'Your name'}
-            // {'Il tuo nome'}
+            value={username || profileData?.data?.name}
             onChangeText={text => setUsername(text)}
           />
+          {fieldErrors?.name && <Text style={tw`text-red-500 text-xs`}>{fieldErrors.name}</Text>}
+
           <InputText
-            placeholder={profileData?.data?.address || 'Inserisci la tua posizione'}
-            placeholderColor={'#949494'}
+            style={tw`h-10`}
+            placeholder={profileData?.data?.address || 'Enter your address'}
             label={'Address'}
-            // {'Posizione'}
+            value={location || profileData?.data?.address}
             onChangeText={text => setLocation(text)}
           />
-          <Button
-            title="Save changes."
-            // "Salva modifiche"
-            containerStyle={tw`flex-1`}
-            onPress={handleSaveProfile}
-          />
+          <Button title="Save changes" containerStyle={tw`flex-1`} onPress={handleSaveProfile} />
 
-          {/* Password Update Section */}
           <Text style={tw`text-center text-title text-2xl font-RoboBold my-4`}>
-            {/* Aggiorna la tua password */}
             Update your password.
           </Text>
+
+          {/* Password Fields */}
           <InputText
+            style={tw`h-10`}
             placeholder={'Enter your old password'}
-            // {'Inserisci la tua vecchia password'}
-            placeholderColor={'#949494'}
             label={'Old password'}
-            // {'Vecchia password'}
             iconLeft={IconKey}
             iconRight={isShowOldPassword ? IconOpenEye : IconCloseEye}
             isShowPassword={!isShowOldPassword}
             rightIconPress={() => setIsShowOldPassword(!isShowOldPassword)}
-            onChangeText={text => setOldPassword(text)}
+            onChangeText={setOldPassword}
           />
+          {fieldErrors?.current_password && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{fieldErrors.current_password}</Text>
+          )}
+
           <InputText
+            style={tw`h-10`}
             placeholder={'Enter your new password'}
-            // {'Inserisci la tua nuova password'}
-            placeholderColor={'#949494'}
             label={'New password'}
-            // {'Nuova password'}
             iconLeft={IconKey}
             iconRight={isShowNewPassword ? IconOpenEye : IconCloseEye}
             isShowPassword={!isShowNewPassword}
             rightIconPress={() => setIsShowNewPassword(!isShowNewPassword)}
-            onChangeText={text => setNewPassword(text)}
+            onChangeText={setNewPassword}
           />
+          {fieldErrors?.new_password && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{fieldErrors.new_password}</Text>
+          )}
+
           <InputText
+            style={tw`h-10`}
             placeholder={'Enter confirm password'}
-            // {'Inserisci la tua password di conferma'}
-            placeholderColor={'#949494'}
             label={'Confirm password'}
-            // {'Conferma la password'}
             iconLeft={IconKey}
             iconRight={isShowConfirmPassword ? IconOpenEye : IconCloseEye}
             isShowPassword={!isShowConfirmPassword}
             rightIconPress={() => setIsShowConfirmPassword(!isShowConfirmPassword)}
-            onChangeText={text => setConfirmPassword(text)}
+            onChangeText={setConfirmPassword}
           />
+          {fieldErrors?.c_password && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{fieldErrors.c_password}</Text>
+          )}
+
+          {/* General Error Fallback */}
+          {generalError ? (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{generalError}</Text>
+          ) : null}
+
+          {/* Save Button */}
+          <View style={tw`mt-4 gap-y-4`}>
+            <Button title="Save changes" onPress={handleChangePassword} />
+          </View>
         </View>
 
-        {/* Save Button */}
-        <View style={tw`mt-4 gap-y-4`}>
-          <Button
-            title="Save changes"
-            // "Salva modifiche"
-            containerStyle={tw``}
-            onPress={handleChangePassword}
-            // onPress={() => setSaveChangesModalVisible(true)}
-          />
-        </View>
-
-        {/* Save Changes Modal */}
+        {/* Success Modal */}
         <NormalModal
           layerContainerStyle={tw`flex-1 justify-center items-center mx-5`}
           containerStyle={tw`rounded-xl bg-white p-5`}
@@ -250,15 +234,14 @@ console.log("38", imageUri)
             <View style={tw`items-center mb-2`}>
               <SvgXml xml={IconTik} height={60} width={60} />
             </View>
-            <Text
-              style={tw`text-center text-title text-2xl font-RoboBold mb-2`}>
+            <Text style={tw`text-center text-title text-2xl font-RoboBold mb-2`}>
               Your profile has been {'\n'}updated
             </Text>
             <Button
               title="Done"
               onPress={() => {
                 setSaveChangesModalVisible(false);
-                navigation.goBack();
+                router.back();
               }}
             />
           </View>

@@ -5,6 +5,7 @@ import {
   Image,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View
 } from 'react-native';
 import { Dropdown, MultiSelect } from 'react-native-element-dropdown';
@@ -42,25 +43,75 @@ interface IProduct {
 const ProductAddFields = ({
   handleUpload,
   navigation,
+  formData,
+  setFormData,
+  fieldErrors = {},
+  errormessage = {},
+  addProductLoading,
 }: {
-  handleUpload: () => void;
+  handleUpload: (productData: IProduct) => void;
+  navigation: any;
+  formData: IProduct;
+  setFormData: React.Dispatch<React.SetStateAction<IProduct>>;
+  fieldErrors?: { [key: string]: string };
+  errormessage?: string;
 }) => {
   const [subCategories, setSubCategories] = React.useState<[]>();
+  const [connectLoading, setConnectLoading] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [connected, setConnected] = useState()
   const [categoryId, setCategoryId] = React.useState<string>();
-  const {data: profileData, refetch} = useGetProfileQuery({});
+  const { data: profileData, refetch } = useGetProfileQuery({});
   const [postCreateConnect] = usePostCreateConnectMutation();
-  const email =  profileData?.data?.email
-  const {data:checkConnet} = useGetCheckConnectQuery(email);
+  const email = profileData?.data?.email
+  const { data: checkConnet } = useGetCheckConnectQuery(email);
   console.log("checkConnect", checkConnet)
-  console.log('data', profileData?.data?.email); 
-  const {data: categories, isLoading, isError} = useGetCategoryListQuery({});
+  console.log('data', profileData?.data?.email);
+  const { data: categories, isLoading, isError } = useGetCategoryListQuery({});
   const [onboardingUrl, setOnboardingUrl] = useState<string | null>(null);
- 
   const [productData, setProductData] = React.useState<IProduct | null>(null);
   console.log('35', profileData?.data?.stripe_account_id);
-  const { height, width } = Dimensions.get('screen'); 
+
+  const colorScheme = useColorScheme(); // 'dark' or 'light'
+
+  const { height, width } = Dimensions.get('screen');
+
+
+  React.useEffect(() => {
+    setProductData(formData);
+  }, [formData]);
+
+
+
+  const {
+    title,
+    images,
+    price,
+    brand,
+    condition,
+    weight,
+    is_food,
+    category_id,
+    sub_category_ids,
+  } = productData || {};
+
+  const allFieldsFilled = !!(
+    title &&
+    images &&
+    price &&
+    brand &&
+    condition &&
+    weight &&
+    typeof is_food !== 'undefined' &&
+    category_id &&
+    sub_category_ids
+  );
+
+  console.log(allFieldsFilled, "✅ All required product fields are filled.");
+  console.log('35', profileData?.data?.stripe_account_id);
+ 
+
+
   const openGallery = () => {
     const options = {
       mediaType: 'photo',
@@ -106,90 +157,7 @@ const ProductAddFields = ({
     });
   };
 
-  // const openGallery = () => {
-  //   const options = {
-  //     mediaType: 'photo',
-  //     quality: 1,
-  //     selectionLimit: 5, // Allows selecting up to 5 images
-  //   };
-
-  //   launchImageLibrary(options, response => {
-  //     if (response.didCancel) {
-  //       console.log('User cancelled gallery picker');
-  //       return;
-  //     }
-
-  //     if (response.errorCode) {
-  //       console.error('Gallery Error:', response.errorMessage);
-  //       return;
-  //     }
-
-  //     if (response.assets?.length) {
-  //       // Helper function to validate and filter image types
-  //       const filterValidImages = assets => {
-  //         const allowedExtensions = ['image/png', 'image/jpeg', 'image/jpg'];
-  //         return assets.filter(
-  //           asset =>
-  //             asset.uri &&
-  //             asset.fileName &&
-  //             asset.type &&
-  //             allowedExtensions.includes(asset.type)
-  //         );
-  //       };
-
-  //       // Filter valid images
-  //       const selectedImages = filterValidImages(response.assets);
-
-  //       // Update state
-  //       setProductData(prevData => {
-  //         const existingImages = prevData?.images || [];
-
-  //         const uniqueImages = [
-  //           ...existingImages,
-  //           ...selectedImages
-  //             .filter(
-  //               newImage =>
-  //                 !existingImages.some(existing => existing.uri === newImage.uri) // Prevent duplicates
-  //             )
-  //             .map(newImage => {
-  //               const fileName = newImage.uri.split('/').pop(); // Extract file name from URI
-  //               const fileType = fileName?.split('.').pop()?.toLowerCase(); // Extract file extension
-
-  //               // Ensure valid MIME type
-  //               const validFileTypes = ['jpeg', 'png', 'jpg'];
-  //               if (!validFileTypes.includes(fileType)) {
-  //                 console.warn(`Invalid file type: ${fileType}. Skipping file.`);
-  //                 return null; // Skip invalid files
-  //               }
-
-  //               return {
-  //                 uri: Platform.select({
-  //                   ios: newImage.uri.replace('file://', ''), // Remove `file://` for iOS
-  //                   android: newImage.uri, // Use URI as-is for Android
-  //                 }),
-  //                 name: fileName,
-  //                 type: `image/${fileType}`, // Construct MIME type
-  //               };
-  //             })
-  //             .filter(Boolean), // Remove invalid or null images
-  //         ].slice(0, 5); // Limit to 5 images
-
-  //         return {
-  //           ...prevData,
-  //           images: uniqueImages, // Update state with valid images
-  //         };
-  //       });
-
-  //     }
-  //   });
-  // };
-
-  // const fileName = fileUri.split('/').pop();
-  //       const fileType = `image/${fileName?.split('.').pop()}`;
-  //       formData.append('image', {
-  //         uri: fileUri,
-  //         name: fileName,
-  //         type: fileType,
+   
 
   React.useEffect(() => {
     if (categoryId) {
@@ -200,86 +168,7 @@ const ProductAddFields = ({
     }
   }, [categoryId]);
 
-  // console.log('Sub =====================', productData);
-
-  // Function to handle redirect to onboarding URL
-  // const handleRedirectToOnboarding = url => {
-  //   if (url) {
-  //     Linking.canOpenURL(url)
-  //       .then(supported => {
-  //         if (supported) {
-  //           Linking.openURL(url);
-  //         } else {
-  //           console.log('Error', 'Unable to open the link.');
-  //         }
-  //       })
-  //       .catch(err => {
-  //         console.error('Error opening URL:', err);
-  //         console.log('Error', 'Something went wrong while opening the link.');
-  //       });
-  //   } else {
-  //     console.log('Error', 'No URL found.');
-  //   }
-  // };
-
-  // Function to handle Stripe Connect button click
-  // const handleGetConnect = async () => {
-  //   console.log('Button clicked');
-  //   setLoading(true); // Show loading indicator
-  //   try {
-  //     const formData = new FormData();
-
-  //     // Append fields to FormData
-  //     formData.append('email', profileData?.data?.email);
-
-  //     // Call API to create Stripe Connect account
-  //     const response = await postCreateConnect(formData).unwrap();
-  //     console.log('Raw response:', response?.onboarding_url); // Log full response
-
-  //     // Extract onboarding_url from response
-  //     const onboarding_url = response?.onboarding_url;
-
-  //     if (onboarding_url) {
-  //       console.log('Onboarding URL:', onboarding_url);
-  //       // const onbRes = handleRedirectToOnboarding(onboarding_url); // Redirect to URL
-  //       return <WebView source={{ uri: onboarding_url }} style={{ flex: 1 }} />;
-
-  //     } else {
-  //       console.warn('Onboarding URL is undefined. Full response:', response);
-  //       console.log('Error', 'Failed to retrieve onboarding URL.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching connect URL:', error);
-  //     console.log('Error', 'Failed to create Stripe Connect account.');
-  //   } finally {
-  //     setLoading(false); // Hide loading indicator
-  //   }
-  //   // try {
-  //   //   const formData = new FormData();
-  //   //   formData.append('email', profileData?.data?.email);
-
-  //   //   // Call API to create Stripe Connect account
-  //   //   const response = await postCreateConnect(formData).unwrap();
-  //   //   console.log('Raw response:', response);
-
-  //   //   const onboarding_url = response?.onboarding_url;
-  //   //   const account_id = response?.account_id; // ✅ Store account ID
-
-  //   //   if (onboarding_url && account_id) {
-  //   //     console.log('Onboarding URL:', onboarding_url);
-  //   //    const oburl =  await handleRedirectToOnboarding(onboarding_url); // Redirect user
-  //   //    console.log("262",oburl)
-  //   // const statusAcount=  await checkAccountStatus(account_id);
-  //   // console.log("264", statusAcount)
-  //   //   } else {
-  //   //     console.warn('Missing onboarding URL or account ID:', response);
-  //   //   }
-  //   // } catch (error) {
-  //   //   console.error('Error fetching connect URL:', error);
-  //   // } finally {
-  //   //   setLoading(false);
-  //   // }
-  // };
+  
 
   const handleGetConnect = async () => {
     console.log('Button clicked');
@@ -315,7 +204,7 @@ const ProductAddFields = ({
       setConnected(event.url.includes('success'))
       // const urlParams = new URLSearchParams(new URL(event.url).search);
       // const email = urlParams.get('email') as string; // Type assertion
-      
+
       // console.log('Extracted Email:', email);
       // Fetch Stripe Account Status
       // try {
@@ -350,9 +239,9 @@ const ProductAddFields = ({
   if (onboardingUrl) {
     return (
       <WebView
-        source={{uri: onboardingUrl}}
+        source={{ uri: onboardingUrl }}
         style={{ flex: 1, width: "100%", height: height * 0.7 }}
-        onNavigationStateChange={handleWebViewNavigation} 
+        onNavigationStateChange={handleWebViewNavigation}
       />
     );
   }
@@ -390,15 +279,14 @@ const ProductAddFields = ({
           </TouchableOpacity>
 
           <View style={tw`flex-row items-center mt-4`}>
-            {productData?.images?.map((item: ImagePickerAsset, index: number) => (
+            {productData?.images?.map((item: Asset, index: number) => (
               <View key={index} style={tw`relative`}>
                 <Image
-                  source={{uri: item.uri}}
-                  style={tw`${
-                    productData?.images[0] === item.uri
-                      ? 'w-16 h-16'
-                      : 'w-12 h-12'
-                  } rounded-lg ml-2`}
+                  source={{ uri: item.uri || " " }}
+                  style={tw`${productData?.images[0] === item.uri
+                    ? 'w-16 h-16'
+                    : 'w-12 h-12'
+                    } rounded-lg ml-2`}
                 />
 
                 <TouchableOpacity
@@ -420,13 +308,14 @@ const ProductAddFields = ({
 
         <View style={tw`mt-4`}>
           <InputText
+          style={tw`h-10`}
+            value={productData?.title || ""}
             placeholder=
-            // {'Inserisci il titolo del prodotto'}
             {"Enter the product title."}
             placeholderColor={'#949494'}
-            label=
+            label={"Title"}
             // {'Titolo'}
-            {"Title"}
+
             onChangeText={(text: any) =>
               setProductData({
                 ...productData,
@@ -434,8 +323,11 @@ const ProductAddFields = ({
               })
             }
           />
-
+          {errormessage?.title && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{errormessage?.title}</Text>
+          )}
           <InputText
+            value={productData?.description || ""}
             placeholder={'Enter the product description'}
             // {'Inserisci la descrizione del prodotto'}
             placeholderColor={'#949494'}
@@ -447,11 +339,13 @@ const ProductAddFields = ({
                 description: text,
               })
             }
-            style={tw`h-18`}
+            style={tw`h-24`}
             placeholderAlignment={'top'}
           />
 
           <InputText
+          style={tw`h-10`}
+            value={productData?.brand || ""}
             placeholder={"Enater the product brand"}
             // {'Inserisci la marca del prodotto'}
             placeholderColor={'#949494'}
@@ -475,6 +369,7 @@ const ProductAddFields = ({
               // onValueChange={}
               style={tw`flex-row items-center gap-4`}>
               <RadioButton
+
                 onPress={() => {
                   setProductData({
                     ...productData,
@@ -484,7 +379,7 @@ const ProductAddFields = ({
                 value={'new'}
                 color="#064145"
                 label={"New"}
-                // {'Nuova'}
+              // {'Nuova'}
               />
               <RadioButton
                 onPress={() => {
@@ -533,18 +428,22 @@ const ProductAddFields = ({
               />
             </RadioGroup>
           </View>
-          {productData?.is_food === 'yes' && (
-            <InputText
-              placeholder={'Enter product weight'}
-              placeholderColor={'#949494'}
-              label={'Weight'}
-              onChangeText={(text: any) =>
-                setProductData({
-                  ...productData,
-                  weight: text,
-                })
-              }
-            />
+          {/* {productData?.is_food === 'yes' && ( */}
+          <InputText
+          style={tw`h-10`}
+            value={productData?.weight || ""}
+            placeholder={'Enter product weight'}
+            placeholderColor={'#949494'}
+            label={'Weight'}
+            onChangeText={(text: any) =>
+              setProductData({
+                ...productData,
+                weight: text,
+              })
+            }
+          />
+          {errormessage?.weight && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{errormessage.weight}</Text>
           )}
           {!isLoading && (
             <View style={tw`mt-4`}>
@@ -553,14 +452,20 @@ const ProductAddFields = ({
                 Category
               </Text>
               <Dropdown
-                style={tw`bg-secondary py-3 px-2 rounded-xl text-title`}
+                style={tw`${colorScheme === 'dark' ? 'bg-gray-800' : 'bg-secondary'} py-3 px-2 rounded-xl`}
+                containerStyle={tw`${colorScheme === 'dark' ? 'bg-gray-700' : 'bg-white'} rounded-xl`}
+                selectedTextStyle={tw`${colorScheme === 'dark' ? 'text-white' : 'text-title'} text-base font-RoboMedium`}
+                placeholderStyle={tw`${colorScheme === 'dark' ? 'text-gray-400' : 'text-[#949494]'} text-base font-RoboMedium pl-2`}
+
+
+                // style={tw`bg-secondary py-3 px-2 rounded-xl text-title`}
                 data={categories?.data?.map(cat => ({
                   label: cat.name,
                   value: cat.id,
                 }))}
                 labelField="label"
-                containerStyle={tw`bg-white rounded-xl`}
-                selectedTextStyle={tw`text-title text-base font-RoboMedium`}
+                // containerStyle={tw`bg-white rounded-xl`}
+                // selectedTextStyle={tw`text-title text-base font-RoboMedium`}
                 valueField="value"
                 placeholder="Select the product from the category."
                 // "selezionare il prodotto della categoria"
@@ -580,14 +485,21 @@ const ProductAddFields = ({
               />
             </View>
           )}
-
-          {subCategories?.length && (
+          {errormessage?.category_id && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{errormessage?.category_id}</Text>
+          )}
+          {/* {subCategories?.length && (
             <View style={tw`mt-4 mb-2`}>
               <Text style={tw`text-title text-sm font-RoboMedium mb-2`}>
                 Subcategory
               </Text>
               <MultiSelect
-                style={tw`bg-secondary py-3 px-2 rounded-xl`}
+
+               style={tw`${colorScheme === 'dark' ? 'bg-gray-800' : 'bg-secondary'} py-3 px-2 rounded-xl`}
+                containerStyle={tw`${colorScheme === 'dark' ? 'bg-gray-700' : 'bg-white'} rounded-xl`}
+                selectedTextStyle={tw`${colorScheme === 'dark' ? 'text-white' : 'text-title'} text-base font-RoboMedium`}
+                placeholderStyle={tw`${colorScheme === 'dark' ? 'text-gray-400' : 'text-[#949494]'} text-base font-RoboMedium pl-2`}
+                // style={tw`bg-secondary py-3 px-2 rounded-xl`}
                 data={
                   subCategories?.map(sub => ({
                     label: sub?.name,
@@ -596,10 +508,10 @@ const ProductAddFields = ({
                 } // Fallback to an empty array if subCategories is undefined
                 labelField="label"
                 valueField="value"
-                containerStyle={tw`bg-white rounded-xl`}
-                selectedTextStyle={tw`text-title text-base font-RoboMedium`}
-                placeholder="Seleziona le sottocategorie"
-                placeholderStyle={tw`text-[#949494] text-base font-RoboMedium pl-2`}
+                // containerStyle={tw`bg-white rounded-xl`}
+                // selectedTextStyle={tw`text-title text-base font-RoboMedium`}
+                placeholder="Select the subcategories"
+              
                 value={productData?.sub_category_ids}
                 onChange={selectedItems => {
                   // Handle updated selected items
@@ -614,9 +526,46 @@ const ProductAddFields = ({
                 selectedStyle={tw`bg-primary100 border border-primary100 rounded-xl`}
               />
             </View>
-          )}
+          )} */}
 
+          {subCategories?.length > 0 && (
+            <View style={tw`mt-4 mb-2`}>
+              <Text style={tw`text-title text-sm font-RoboMedium mb-2`}>
+                Subcategory
+              </Text>
+              <MultiSelect
+                style={tw`${colorScheme === 'dark' ? 'bg-gray-800' : 'bg-secondary'} py-3 px-2 rounded-xl`}
+                containerStyle={tw`${colorScheme === 'dark' ? 'bg-gray-700' : 'bg-white'} rounded-xl`}
+                selectedTextStyle={tw`${colorScheme === 'dark' ? 'text-white' : 'text-title'} text-base font-RoboMedium`}
+                placeholderStyle={tw`${colorScheme === 'dark' ? 'text-gray-400' : 'text-[#949494]'} text-base font-RoboMedium pl-2`}
+                data={subCategories?.map(sub => ({
+                  label: sub?.name,
+                  value: sub?.id,
+                })) || []}
+                labelField="label"
+                valueField="value"
+                placeholder="Select the subcategories"
+                value={productData?.sub_category_ids}
+                onChange={selectedItems => {
+                  setProductData(prevData => ({
+                    ...prevData,
+                    sub_category_ids: selectedItems || [],
+                  }));
+                }}
+                search
+                searchPlaceholder="Cerca sottocategoria"
+                activeColor="black"
+                selectedStyle={tw`${colorScheme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-primary100 border-primary100'} rounded-xl`}
+
+              />
+            </View>
+          )}
+          {errormessage?.sub_category_ids && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{errormessage?.sub_category_ids}</Text>
+          )}
           <InputText
+          style={tw`h-10`}
+            value={productData?.price || ""}
             placeholder={'€0.00'}
             placeholderColor={'#949494'}
             label={"Price"}
@@ -628,20 +577,26 @@ const ProductAddFields = ({
               })
             }
           />
+          {errormessage?.price && (
+            <Text style={tw`text-xs text-red-500 mt-1`}>{errormessage.price}</Text>
+          )}
         </View>
-        {profileData?.data?.stripe_account_id || connected &&
-        profileData?.data?.stripe_account_id || connected ? (
+        {/* {!allFieldsFilled && (
+          <Text style={tw`text-red-600`}>Please fill in all the required fields.*</Text>
+        )} */}
+        {(profileData?.data?.stripe_account_id) ? (
           <Button
             containerStyle={tw`mt-4 mb-2`}
-            title={'Add Product'}
-            // {'Caricamento'}
+            title={addProductLoading ? "Adding Product..." : "Add Product"}
             onPress={() => handleUpload && handleUpload(productData)}
+            disabled={addProductLoading} // optional: disable while loading
           />
         ) : (
           <Button
             containerStyle={tw`mt-4 mb-2 bg-[red]`}
-            title={'Get Connect'}
+            title={connectLoading ? "Wait..." : 'Get Connect'}
             onPress={handleGetConnect}
+            disabled={connectLoading} // optional: disable while loading
           />
         )}
       </View>
